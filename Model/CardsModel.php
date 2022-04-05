@@ -1,32 +1,30 @@
-<?php
-
+<?php 
 namespace MauticPlugin\PowerticPipesBundle\Model;
 
 use Doctrine\DBAL\Query\QueryBuilder;
 use Mautic\CoreBundle\Model\AjaxLookupModelInterface;
 use Mautic\CoreBundle\Model\FormModel;
-use MauticPlugin\PowerticPipesBundle\Entity\Pipes;
-use MauticPlugin\PowerticPipesBundle\Form\Type\PipesType;
+use MauticPlugin\PowerticPipesBundle\Entity\Lists;
+use MauticPlugin\PowerticPipesBundle\Form\Type\ListsType;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
-class PipesModel extends FormModel implements AjaxLookupModelInterface
+class CardsModel extends FormModel implements AjaxLookupModelInterface
 {
-
   public function createForm($entity, $formFactory, $action = null, $options = [])
     {
-        if (!$entity instanceof Pipes) {
-            throw new MethodNotAllowedHttpException(['Pipes']);
+        if (!$entity instanceof Cards) {
+            throw new MethodNotAllowedHttpException(['Cards']);
         }
         if (!empty($action)) {
             $options['action'] = $action;
         }
 
-        return $formFactory->create(PipesType::class, $entity, $options);
+        return $formFactory->create(CardsType::class, $entity, $options);
     }
 
     public function getRepository()
     {
-        return $this->em->getRepository('PowerticPipesBundle:Pipes');
+        return $this->em->getRepository('PowerticPipesBundle:Cards');
     }
 
     /**
@@ -34,7 +32,7 @@ class PipesModel extends FormModel implements AjaxLookupModelInterface
      */
     public function getPermissionBase()
     {
-        return 'powerticpipes:pipes';
+        return 'powerticpipes:lists';
     }
 
     /**
@@ -42,12 +40,12 @@ class PipesModel extends FormModel implements AjaxLookupModelInterface
      *
      * @param $id
      *
-     * @return Pipe|null
+     * @return Lists|null
      */
     public function getEntity($id = null)
     {
         if (null === $id) {
-            $entity = new Pipes();
+            $entity = new Lists();
         } else {
             $entity = parent::getEntity($id);
         }
@@ -55,24 +53,9 @@ class PipesModel extends FormModel implements AjaxLookupModelInterface
         return $entity;
     }
 
-    public function getFull($id)
-    {
-        $qb = $this->em->createQueryBuilder()
-                    ->select('p, l, c')
-                    ->from('PowerticPipesBundle:Pipes', 'p')
-                    ->leftJoin('p.lists', 'l')
-                    ->leftJoin('l.cards', 'c')
-                    ->orderBy('l.sort, c.sort')
-                    ->where('p.id = '.$id);
-     
-            
-        return $qb->getQuery()->getArrayResult();
-    }
-
   public function getLookupResults($type, $filter = '', $limit = 10, $start = 0, $options = [])
   {
     $results = [];
     return $results;
   }
-
 }

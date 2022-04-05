@@ -83,9 +83,12 @@ $view['slots']->set(
           <a href="<?php echo $view['router']->path(
                                     'mautic_powerticpipes.lists_action',
                                     ['pipe_id' => $entity->getId(), 'objectAction' => 'new']
-                                ); ?>" class="btn btn-success" id="add_list" data-toggle="ajaxmodal" data-target="#MauticSharedModal" data-header="<?php echo $view['translator']->trans('plugin.powerticpipes.add_list'); ?>"><i class="fa fa-plus"></i> <?php echo $view['translator']->trans('plugin.powerticpipes.add_list'); ?></a>
+                                ); ?>" class="btn btn-success" id="add_list"><i class="fa fa-plus"></i> <?php echo $view['translator']->trans('plugin.powerticpipes.add_list'); ?></a>
         </div>
-
+        
+        <script>
+            var kanban_content = <?php echo json_encode($boards) ?>;
+        </script>
         <div id="myKanban"></div>
     </div>
     <!--/ left section -->

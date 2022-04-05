@@ -10,18 +10,6 @@ use Mautic\CoreBundle\Entity\CommonRepository;
 class PipesRepository extends CommonRepository
 {
 
-    public function getEntities($args = array())
-    {
-        $q = $this->getEntityManager()
-            ->createQueryBuilder()
-            ->select($this->getTableAlias() . '')
-            ->from('PowerticPipesBundle:Pipes', $this->getTableAlias(), $this->getTableAlias() . '.id');
-
-        $args['qb'] = $q;
-
-        return parent::getEntities($args);
-    }
-
     /**
      * {@inheritdoc}
      */

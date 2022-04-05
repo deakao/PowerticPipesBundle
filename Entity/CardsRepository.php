@@ -41,6 +41,7 @@ class CardsRepository extends CommonRepository
         return $this->addStandardCatchAllWhereClause($q, $filter, [
             $this->getTableAlias().'.name',
             $this->getTableAlias().'.description',
+            $this->getTableAlias().'.sort',
         ]);
     }
     /**

@@ -2,7 +2,7 @@
 return [
     'name' => 'Powertic Pipes',
     'description' => 'Pipes',
-    'version' => '0.3',
+    'version' => '0.4',
     'author' => 'Denis Akao',
     'menu' => [
         'main' => [
@@ -36,6 +36,9 @@ return [
             ],
             'mautic.powerticpipes.model.lists' => [
                 'class'     => 'MauticPlugin\PowerticPipesBundle\Model\ListsModel'
+            ],
+            'mautic.powerticpipes.model.cards' => [
+                'class'     => 'MauticPlugin\PowerticPipesBundle\Model\CardsModel'
             ],
         ],
         'forms' => [

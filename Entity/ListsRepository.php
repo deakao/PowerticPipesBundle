@@ -40,6 +40,7 @@ class ListsRepository extends CommonRepository
     {
         return $this->addStandardCatchAllWhereClause($q, $filter, [
             $this->getTableAlias().'.name',
+            $this->getTableAlias().'.sort',
         ]);
     }
     /**

@@ -40,7 +40,7 @@ class ListsModel extends FormModel implements AjaxLookupModelInterface
      *
      * @param $id
      *
-     * @return Pipe|null
+     * @return Lists|null
      */
     public function getEntity($id = null)
     {

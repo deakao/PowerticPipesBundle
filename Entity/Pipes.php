@@ -48,10 +48,8 @@ class Pipes extends FormEntity
             ->setCustomRepositoryClass('MauticPlugin\PowerticPipesBundle\Entity\PipesRepository');
         
         $builder->createOneToMany('lists', 'Lists')
-            ->mappedBy('list_id')
-            ->cascadePersist()
-            ->cascadeRemove()
-            ->fetchExtraLazy()
+            ->mappedBy('pipe')
+            ->addJoinColumn('id', 'pipe_id', true, false, 'CASCADE')
             ->build();
 
         $builder->addIdColumns();
@@ -101,6 +99,11 @@ class Pipes extends FormEntity
     {
         $this->description = $description;
         return $this;
+    }
+
+    public function getLists()
+    {
+        return $this->lists;
     }
 
 }

@@ -19,6 +19,11 @@ class Cards extends FormEntity
   private $name;
 
   /**
+   * @var int
+   */
+  private $sort;
+
+  /**
   * @var string
   */
   private $description;
@@ -33,18 +38,23 @@ class Cards extends FormEntity
 
   public static function loadMetadata(ORM\ClassMetadata $metadata)
   {
-      $builder = new ClassMetadataBuilder($metadata);
+    $builder = new ClassMetadataBuilder($metadata);
 
-      $builder->setTable('powertic_pipes_cards')
-          ->setCustomRepositoryClass('MauticPlugin\PowerticPipesBundle\Entity\CardsRepository');
+    $builder->setTable('powertic_pipes_cards')
+          ->setCustomRepositoryClass('MauticPlugin\PowerticPipesBundle\Entity\CardsRepository')
+          ->addIndex(['sort'], 'sort');
 
-        $builder->createManyToOne('list', 'Lists')
+    $builder->createManyToOne('list', 'Lists')
             ->inversedBy('lists')
             ->addJoinColumn('list_id', 'id', false, false, 'CASCADE')
             ->build();
 
+    $builder->createField('sort', 'integer')
+            ->columnName('sort')
+            ->nullable()
+            ->build();
 
-      $builder->addIdColumns();
+    $builder->addIdColumns();
   } 
 
 
@@ -92,5 +102,16 @@ class Cards extends FormEntity
     {
         $this->description = $description;
         return $this;
+    }
+
+    public function setSort($sort)
+    {
+      $this->sort = (int) $sort;
+      return $this;
+    }
+
+    public function getSort()
+    {
+      return $this->sort;
     }
 }

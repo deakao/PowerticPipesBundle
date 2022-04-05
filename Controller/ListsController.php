@@ -12,49 +12,38 @@ use Mautic\CoreBundle\Factory\PageHelperFactoryInterface;
 */
 class ListsController extends AbstractStandardFormController
 {
-  public function deleteAction($objectId)
-  {
-    return $this->deleteStandard($objectId);
-  }
+    public function deleteAction($objectId)
+    {
+        return $this->deleteStandard($objectId);
+    }
   
-  public function editAction($objectId, $ignorePost = false)
-  {
-    return $this->editStandard($objectId, $ignorePost);
-  }
-
-  public function newAction($entity = null)
-  {
-    $model = $this->getModel($this->getModelName());
-
-    if (!($entity instanceof Lists)) {
-        $entity = $model->getEntity();
+    public function editAction($objectId, $ignorePost = false)
+    {
+        return $this->editStandard($objectId, $ignorePost);
     }
 
-    if (!$this->get('mautic.security')->isGranted('powerticpipes:lists:create')) {
-        return $this->accessDenied();
+    public function newAction($entity = null)
+    {
+        $model = $this->getModel($this->getModelName());
+
+        if (!($entity instanceof Lists)) {
+            $entity = $model->getEntity();
+        }
+
+        if (!$this->get('mautic.security')->isGranted('powerticpipes:lists:create')) {
+            return $this->accessDenied();
+        }
+        $entity->setName($this->translator->trans('plugin.powerticpipes.add_list'));
+        $pipe = $this->getModel('powerticpipes.pipes')->getEntity($this->request->get('pipe_id'));
+        $entity->setPipe($pipe);
+        $entity->setSort($this->request->get('order'));
+
+        $model->saveEntity($entity);
+
+        return new JsonResponse(['list_id' => $entity->getId(), 'name' => $entity->getName()]);
     }
-    $entity->setName('Nova Lista');
-    $entity->setPipe($this->request->get('pipe'));
 
-    $model->saveEntity($entity);
-
-    return $this->ajaxAction(
-        [
-            'contentTemplate' => 'PowerticPipesBundle:Pipes:form.html.php',
-            'passthroughVars' => [
-                'activeLink'    => '#mautic_powerticpipes_index',
-                'mauticContent' => 'pipes',
-                'route'         => $this->generateUrl(
-                    $this->getActionRoute(),
-                    [
-                        'objectAction' => 'new',
-                    ]
-                ),
-            ],
-        ]
-    );
-  }
-  protected function getModelName()
+    protected function getModelName()
     {
         return 'powerticpipes.lists';
     }

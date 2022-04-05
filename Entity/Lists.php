@@ -18,10 +18,20 @@ class Lists extends FormEntity
   */
   private $name;
 
-  private $pipe_id;
+  /**
+   * @var int
+   */
+  private $sort;
 
+  
+  /**
+   * @var ArrayCollection
+   */
   private $cards;
 
+  /**
+   * @var \MauticPlugin\PowerticPipesBundle\Entity\Pipes
+   */
   private $pipe;
   
   
@@ -35,11 +45,22 @@ class Lists extends FormEntity
       $builder = new ClassMetadataBuilder($metadata);
 
       $builder->setTable('powertic_pipes_lists')
-          ->setCustomRepositoryClass('MauticPlugin\PowerticPipesBundle\Entity\ListsRepository');
+          ->setCustomRepositoryClass('MauticPlugin\PowerticPipesBundle\Entity\ListsRepository')
+          ->addIndex(['sort'], 'sort');
 
       $builder->createManyToOne('pipe', 'Pipes')
             ->inversedBy('pipes')
             ->addJoinColumn('pipe_id', 'id', false, false, 'CASCADE')
+            ->build();
+
+      $builder->createOneToMany('cards', 'Cards')
+            ->mappedBy('list')
+            ->addJoinColumn('id', 'list_id', true, false, 'CASCADE')
+            ->build();
+
+      $builder->createField('sort', 'integer')
+            ->columnName('sort')
+            ->nullable()
             ->build();
 
       $builder->addIdColumns('name', false);
@@ -74,9 +95,21 @@ class Lists extends FormEntity
         return $this;
     }
 
-    public function setPipe($pipe_id)
+    public function setPipe($pipe)
     {
-      $this->pipe_id = $pipe_id;
+      $this->pipe = $pipe;
+      return $this;
+    }
+
+    public function setSort($sort)
+    {
+      $this->sort = (int) $sort;
+      return $this;
+    }
+
+    public function getSort()
+    {
+      return $this->sort;
     }
     
 }

@@ -202,10 +202,22 @@ class PipesController extends AbstractStandardFormController
         ];
 
         $route = $this->generateUrl($this->getActionRoute(), $routeVars);
+        $board = $model->getFull($entity->getId())[0];
+        $boards = [];
+        foreach ($board['lists'] as $list) {
+            $boards[$list['id']]['id'] = 'id_'.$list['id'];
+            $boards[$list['id']]['title'] = $list['name'];
+            $boards[$list['id']]['item'] = [];
+            foreach($list['cards'] as $item) {
+                $boards[$list['id']]['item'][] = ['title' => $item['name'], 'id' => $item['id']];
+            }
+        }
+
 
         $delegateArgs = [
             'viewParameters' => [
                 'entity'     => $entity,
+                'boards'     => array_values($boards),
                 'tmpl'        => $this->request->isXmlHttpRequest() ? $this->request->get('tmpl', 'index') : 'index',
                 'permissions' => $security->isGranted(
                     [
