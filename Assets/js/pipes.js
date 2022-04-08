@@ -12,8 +12,6 @@ var kanban;
         footer: false                                                // position the button on footer
       },   
       buttonClick: function(el, boardId) {
-        console.log(el);
-        console.log(boardId);
         // create a form to enter element
         var formItem = document.createElement("form");
         formItem.setAttribute("class", "itemform");
@@ -24,14 +22,42 @@ var kanban;
         formItem.addEventListener("submit", function(e) {
           e.preventDefault();
           var text = e.target[0].value;
-          kanban.addElement(boardId, {
-            title: text
+          $.post(addCardAction, {
+            list_id: boardId,
+            name: text,
+            order: kanban.options.boards[3].item.length+1
+          }, function(data){
+            kanban.addElement(boardId, {
+              title: text,
+              id: data.id,
+            });
           });
+          
           formItem.parentNode.removeChild(formItem);
         });
         document.getElementById("CancelBtn").onclick = function() {
           formItem.parentNode.removeChild(formItem);
         };
+      },
+      dragendBoard: function (el) {
+        var lists = $('.kanban-container')
+        var post_data = {};
+        lists.find('.kanban-board').each(function(index, el) {
+          post_data['list_id['+index+']'] = $(el).attr('data-id').replace('id_', '');
+          post_data['order['+index+']'] = index+1;
+        });
+        $.post(updateListSortAction, post_data);
+      },
+      dragendEl: function (item) {
+        var elm = $(item).parents('.kanban-board');
+        var post_data = {
+          'list_id': elm.attr('data-id').replace('id_', ''),
+        }
+        elm.find('.kanban-item').each(function(index, el) {
+          post_data['card_id['+index+']'] = $(el).attr('data-eid');
+          post_data['order['+index+']'] = index+1;
+        });
+        $.post(updateCardSortAction, post_data);
       },
       
       boards: kanban_content
@@ -58,6 +84,11 @@ var kanban;
 
   $('.kanban-title-board').on('input', function(e) {
     var text = $(this).text();
-    console.log(text);
+    var id = $(this).parents('.kanban-board').attr('data-id').replace('id_', '');
+    var post_data = {
+      'name': text,
+      'list_id': id
+    }
+    $.post(updateListNameAction, post_data)
   })
 })(jQuery);

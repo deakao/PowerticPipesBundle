@@ -26,6 +26,10 @@ return [
             'mautic_powerticpipes.lists_action' => [
                 'path'       => '/powerticpipes/lists/{objectAction}/{objectId}',
                 'controller' => 'PowerticPipesBundle:Lists:execute',
+            ],
+            'mautic_powerticpipes.cards_action' => [
+                'path'       => '/powerticpipes/cards/{objectAction}/{objectId}',
+                'controller' => 'PowerticPipesBundle:Cards:execute',
             ]
         ]
     ],

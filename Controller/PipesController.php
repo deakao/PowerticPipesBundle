@@ -218,6 +218,10 @@ class PipesController extends AbstractStandardFormController
             'viewParameters' => [
                 'entity'     => $entity,
                 'boards'     => array_values($boards),
+                'addCardAction' => $this->generateUrl('mautic_powerticpipes.cards_action', ['objectAction' => 'new']),
+                'updateListSortAction' => $this->generateUrl('mautic_powerticpipes.lists_action', ['objectAction' => 'updateSort']),
+                'updateListNameAction' => $this->generateUrl('mautic_powerticpipes.lists_action', ['objectAction' => 'updateName']),
+                'updateCardSortAction' => $this->generateUrl('mautic_powerticpipes.cards_action', ['objectAction' => 'updateSort']),
                 'tmpl'        => $this->request->isXmlHttpRequest() ? $this->request->get('tmpl', 'index') : 'index',
                 'permissions' => $security->isGranted(
                     [

@@ -114,4 +114,10 @@ class Cards extends FormEntity
     {
       return $this->sort;
     }
+
+    public function setList($list)
+    {
+      $this->list = $list;
+      return $this;
+    }
 }

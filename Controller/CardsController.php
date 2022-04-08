@@ -8,9 +8,9 @@ use Mautic\CoreBundle\Controller\AbstractFormController;
 use Mautic\CoreBundle\Factory\PageHelperFactoryInterface;
 
 /**
-* Class ListsController.
+* Class CardsController.
 */
-class ListsController extends AbstractStandardFormController
+class CardsController extends AbstractStandardFormController
 {
     public function deleteAction($objectId)
     {
@@ -26,58 +26,53 @@ class ListsController extends AbstractStandardFormController
     {
         $model = $this->getModel($this->getModelName());
 
-        if (!($entity instanceof Lists)) {
+        if (!($entity instanceof Cards)) {
             $entity = $model->getEntity();
         }
 
-        if (!$this->get('mautic.security')->isGranted('powerticpipes:lists:create')) {
+        if (!$this->get('mautic.security')->isGranted('powerticpipes:cards:create')) {
             return $this->accessDenied();
         }
-        $entity->setName($this->translator->trans('plugin.powerticpipes.add_list'));
-        $pipe = $this->getModel('powerticpipes.pipes')->getEntity($this->request->get('pipe_id'));
-        $entity->setPipe($pipe);
+        $entity->setName($this->request->get('card'));
+        $list = $this->getModel('powerticpipes.lists')->getEntity(str_replace('id_', '', $this->request->get('list_id')));
+        $entity->setList($list);
         $entity->setSort($this->request->get('order'));
+        $entity->setName($this->request->get('name'));
 
         $model->saveEntity($entity);
 
-        return new JsonResponse(['list_id' => $entity->getId(), 'name' => $entity->getName()]);
+        return new JsonResponse(['id' => $entity->getId()]);
     }
 
     public function updateSortAction()
     {
         $model = $this->getModel($this->getModelName());
-        $lists = $this->request->get('list_id');
+        $listModel = $this->getModel('powerticpipes.lists');
+        $listEntity = $listModel->getEntity($this->request->get('list_id'));
+        $cards = $this->request->get('card_id');
         $orders = $this->request->get('order');
-        foreach($lists as $k => $list_id) {
-            $list = $model->getEntity($list_id);
-            $list->setSort($orders[$k]);
-            $model->saveEntity($list);
+        foreach($cards as $k => $card) {
+            $entity = $model->getEntity($card);
+            $entity->setSort($orders[$k]);
+            $entity->setList($listEntity);
+            $model->saveEntity($entity);
         }
-        return new JsonResponse(['status' => 1]);
-    }
-
-    public function updateNameAction()
-    {
-        $model = $this->getModel($this->getModelName());
-        $list = $model->getEntity($this->request->get('list_id'));
-        $list->setName($this->request->get('name'));
-        $model->saveEntity($list);
         return new JsonResponse(['status' => 1]);
     }
 
     protected function getModelName()
     {
-        return 'powerticpipes.lists';
+        return 'powerticpipes.cards';
     }
 
     protected function getPermissionBase()
     {
-        return 'powerticpipes:lists';
+        return 'powerticpipes:cards';
     }
 
     protected function getActionRoute()
     {
-        return 'mautic_powerticpipes.lists_action';
+        return 'mautic_powerticpipes.cards_action';
     }
 
     /**
@@ -85,12 +80,7 @@ class ListsController extends AbstractStandardFormController
      */
     protected function getControllerBase()
     {
-        return 'PowerticPipesBundle:Lists';
-    }
-
-    protected function getTemplateBase()
-    {
-        return 'PowerticPipesBundle:Lists';
+        return 'PowerticPipesBundle:Cards';
     }
 
     protected function getTemplateName($file)

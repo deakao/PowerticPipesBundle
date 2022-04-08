@@ -4,8 +4,8 @@ namespace MauticPlugin\PowerticPipesBundle\Model;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Mautic\CoreBundle\Model\AjaxLookupModelInterface;
 use Mautic\CoreBundle\Model\FormModel;
-use MauticPlugin\PowerticPipesBundle\Entity\Lists;
-use MauticPlugin\PowerticPipesBundle\Form\Type\ListsType;
+use MauticPlugin\PowerticPipesBundle\Entity\Cards;
+use MauticPlugin\PowerticPipesBundle\Form\Type\CardsType;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 class CardsModel extends FormModel implements AjaxLookupModelInterface
@@ -32,7 +32,7 @@ class CardsModel extends FormModel implements AjaxLookupModelInterface
      */
     public function getPermissionBase()
     {
-        return 'powerticpipes:lists';
+        return 'powerticpipes:cards';
     }
 
     /**
@@ -40,12 +40,12 @@ class CardsModel extends FormModel implements AjaxLookupModelInterface
      *
      * @param $id
      *
-     * @return Lists|null
+     * @return Cards|null
      */
     public function getEntity($id = null)
     {
         if (null === $id) {
-            $entity = new Lists();
+            $entity = new Cards();
         } else {
             $entity = parent::getEntity($id);
         }
