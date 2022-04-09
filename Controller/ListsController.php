@@ -14,7 +14,15 @@ class ListsController extends AbstractStandardFormController
 {
     public function deleteAction($objectId)
     {
-        return $this->deleteStandard($objectId);
+        $model     = $this->getModel($this->getModelName());
+        $entity    = $model->getEntity($objectId);
+        $model->deleteEntity($entity);
+
+        return new JsonResponse(
+            [
+                'success' => 1,
+            ]
+        );
     }
   
     public function editAction($objectId, $ignorePost = false)

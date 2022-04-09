@@ -6,11 +6,15 @@ var kanban;
     kanban = new jKanban({
       element:'#myKanban',
       itemAddOptions: {
-        enabled: true,                                              // add a button to board for easy item creation
-        content: '+',                                                // text or html content of the board button   
-        class: 'kanban-title-button btn btn-default btn-xs',         // default class of the button
-        footer: false                                                // position the button on footer
-      },   
+        enabled: true,
+        content: mauticLang['plugin.powerticpipes.btn_add_item'],
+        class: 'kanban-title-button btn btn-success btn-block',         // default class of the button
+        footer: true                                                // position the button on footer
+      },
+      itemRemoveOptions: {
+        enabled: true,
+      },
+      
       buttonClick: function(el, boardId) {
         // create a form to enter element
         var formItem = document.createElement("form");
@@ -22,6 +26,8 @@ var kanban;
         formItem.addEventListener("submit", function(e) {
           e.preventDefault();
           var text = e.target[0].value;
+          formItem.parentNode.removeChild(formItem);
+
           $.post(addCardAction, {
             list_id: boardId,
             name: text,
@@ -32,9 +38,8 @@ var kanban;
               id: data.id,
             });
           });
-          
-          formItem.parentNode.removeChild(formItem);
         });
+
         document.getElementById("CancelBtn").onclick = function() {
           formItem.parentNode.removeChild(formItem);
         };
@@ -59,6 +64,15 @@ var kanban;
         });
         $.post(updateCardSortAction, post_data);
       },
+      buttonRemoveClick: function(el, boardId) {
+        if(confirm(mauticLang['plugin.powerticpipes.confirm_delete_list'])){
+          $(el).parents('.kanban-board').fadeOut(function(){
+            $(this).remove();
+          });
+          $.get(removeListAction+'/'+boardId.replace('id_', ''));
+        }
+        
+      },
       
       boards: kanban_content
     });
@@ -82,7 +96,7 @@ var kanban;
     });
   }
 
-  $('.kanban-title-board').on('input', function(e) {
+  $('body').on('input', '.kanban-title-board', function(e) {
     var text = $(this).text();
     var id = $(this).parents('.kanban-board').attr('data-id').replace('id_', '');
     var post_data = {
@@ -90,5 +104,18 @@ var kanban;
       'list_id': id
     }
     $.post(updateListNameAction, post_data)
-  })
+  });
+
+  $('body').on('click', '.kanban-item-remove', function(e) {
+    e.preventDefault();
+    var elm = $(this)
+    var id = elm.parents('.kanban-item').attr('data-eid');
+    if(confirm(mauticLang['plugin.powerticpipes.confirm_delete_card'])){
+      $.get(removeCardAction+'/'+id.replace('id_', ''));
+      elm.parents('.kanban-item').fadeOut(function(){
+        elm.parents('.kanban-item').remove();
+      });
+    }
+  });
+  
 })(jQuery);

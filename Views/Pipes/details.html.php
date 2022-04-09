@@ -91,6 +91,8 @@ $view['slots']->set(
             var updateListSortAction = "<?php echo $updateListSortAction ?>";
             var updateListNameAction = "<?php echo $updateListNameAction ?>";
             var updateCardSortAction = "<?php echo $updateCardSortAction ?>";
+            var removeListAction = "<?php echo $removeListAction ?>";
+            var removeCardAction = "<?php echo $removeCardAction ?>";
             var kanban_content = <?php echo json_encode($boards) ?>;
         </script>
         <div id="myKanban"></div>
