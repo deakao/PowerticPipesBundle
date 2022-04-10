@@ -45,6 +45,7 @@ echo $view['form']->start($form);
             <div class="pr-lg pl-lg pt-md pb-md">
                 <?php
                 echo $view['form']->row($form['isPublished']);
+                echo (isset($newAction) ? $view['form']->row($form['fromStages']) : '');
                 ?>
             </div>
         </div>

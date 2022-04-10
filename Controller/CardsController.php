@@ -27,7 +27,38 @@ class CardsController extends AbstractStandardFormController
   
     public function editAction($objectId, $ignorePost = false)
     {
-        return $this->editStandard($objectId, $ignorePost);
+        $model = $this->getModel($this->getModelName());
+        $entity = $model->getEntity($objectId);
+        $action = $this->generateUrl('mautic_powerticpipes.cards_action', ['objectAction' => 'edit', 'objectId' => $objectId]);
+        $editForm = $model->createForm($entity, $this->get('form.factory'), $action);
+
+        if (!$ignorePost && 'POST' == $this->request->getMethod()) {
+            $post = $this->request->get('cards');
+            $entity->setName($post['name']);
+            $entity->setDescription($post['description']);
+            $model->saveEntity($entity);
+            return new JsonResponse(
+                [
+                    'closeModal' => true,
+                    'notifyChange' => true,
+                    'name' => $entity->getName(),
+                    'id' => $entity->getId(),
+                ]
+            );
+        }
+        
+        return $this->delegateView(
+            [
+                'viewParameters' => [
+                    'editForm' => $editForm->createView(),
+                ],
+                'contentTemplate' => 'PowerticPipesBundle:Pipes:edit_card.html.php',
+                'passthroughVars' => [
+                    'mauticContent' => 'powerticpipes',
+                    'route'         => false,
+                ],
+            ]
+        );
     }
 
     public function newAction($entity = null)

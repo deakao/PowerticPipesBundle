@@ -7,6 +7,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Mautic\CoreBundle\Controller\AbstractFormController;
 use Mautic\CoreBundle\Factory\PageHelperFactoryInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 
 /**
  * Class PipesController.
@@ -72,6 +74,7 @@ class PipesController extends AbstractStandardFormController
         $form = $model->createForm($entity, $this->get('form.factory'), $action);
         
         
+        
         $viewParameters = ['page' => $page];
 
         if ('POST' === $method) {
@@ -80,13 +83,41 @@ class PipesController extends AbstractStandardFormController
             if (!$cancelled = $this->isFormCancelled($form)) {
                 if ($valid = $this->isFormValid($form)) {
                     //form is valid so process the data
+                    $post = $this->request->get('pipes');
                     $model->saveEntity($entity);
+                    
+                    if($post['fromStages']){
+                        $listModel = $this->getModel('powerticpipes.lists');
+                        $stageModel = $this->getModel('stage');
+
+                        $stagesPublished = $stageModel->getEntities(
+                            [
+                                'filter' => [
+                                    'force' => [
+                                        [
+                                            'column' => 's.isPublished',
+                                            'expr'   => 'eq',
+                                            'value'  => true,
+                                        ],
+                                    ],
+                                ],
+                            ]
+                        );
+                        foreach($stagesPublished as $k => $stage){
+                            $listEntity = $listModel->getEntity();
+                            $listEntity->setName($stage->getName());
+                            $listEntity->setSort($k);
+                            $listEntity->setPipe($entity);
+                            $listModel->saveEntity($listEntity);
+                        }
+                    }
+
 
                     $this->addFlash(
                         'mautic.core.notice.created',
                         [
                             '%name%'      => $entity->getName(),
-                            '%menu_link%' => 'mautic_powerticpipes_index',
+                            '%menu_link%' => 'mautic_powerticpipes.pipes_index',
                             '%url%'       => $this->generateUrl(
                                 $this->getActionRoute(),
                                 [
@@ -98,7 +129,7 @@ class PipesController extends AbstractStandardFormController
                     );
 
                     if ($form->get('buttons')->get('save')->isClicked()) {
-                        $returnUrl = $this->generateUrl('mautic_powerticpipes_index', $viewParameters);
+                        $returnUrl = $this->generateUrl('mautic_powerticpipes.pipes_index', $viewParameters);
                         $template  = 'PowerticPipesBundle:Pipes:index';
                     } else {
                         //return edit view so that all the session stuff is loaded
@@ -106,7 +137,7 @@ class PipesController extends AbstractStandardFormController
                     }
                 }
             } else {
-                $returnUrl = $this->generateUrl('mautic_powerticpipes_index', $viewParameters);
+                $returnUrl = $this->generateUrl('mautic_powerticpipes.pipes_index', $viewParameters);
                 $template  = 'PowerticPipesBundle:Pipes:index';
             }
 
@@ -117,7 +148,7 @@ class PipesController extends AbstractStandardFormController
                         'viewParameters'  => $viewParameters,
                         'contentTemplate' => $template,
                         'passthroughVars' => [
-                            'activeLink'    => '#mautic_powerticpipes_index',
+                            'activeLink'    => '#mautic_powerticpipes.pipes_index',
                             'mauticContent' => 'pipes',
                         ],
                     ]
@@ -134,11 +165,13 @@ class PipesController extends AbstractStandardFormController
             [
                 'viewParameters' => [
                     'entity'  => $entity,
+                    'newAction' => true,
                     'form'    => $this->setFormTheme($form, 'PowerticPipesBundle:Pipes:form.html.php', $themes),
                 ],
+                
                 'contentTemplate' => 'PowerticPipesBundle:Pipes:form.html.php',
                 'passthroughVars' => [
-                    'activeLink'    => '#mautic_powerticpipes_index',
+                    'activeLink'    => '#mautic_powerticpipes.pipes_index',
                     'mauticContent' => 'pipes',
                     'route'         => $this->generateUrl(
                         $this->getActionRoute(),
@@ -222,6 +255,7 @@ class PipesController extends AbstractStandardFormController
                 'updateListSortAction' => $this->generateUrl('mautic_powerticpipes.lists_action', ['objectAction' => 'updateSort']),
                 'removeListAction' => $this->generateUrl('mautic_powerticpipes.lists_action', ['objectAction' => 'delete']),
                 'removeCardAction' => $this->generateUrl('mautic_powerticpipes.cards_action', ['objectAction' => 'delete']),
+                'editCardAction' => $this->generateUrl('mautic_powerticpipes.cards_action', ['objectAction' => 'edit']),
                 'updateListNameAction' => $this->generateUrl('mautic_powerticpipes.lists_action', ['objectAction' => 'updateName']),
                 'updateCardSortAction' => $this->generateUrl('mautic_powerticpipes.cards_action', ['objectAction' => 'updateSort']),
                 'tmpl'        => $this->request->isXmlHttpRequest() ? $this->request->get('tmpl', 'index') : 'index',
@@ -277,6 +311,69 @@ class PipesController extends AbstractStandardFormController
         return $this->newAction($entity);
     }
 
+    public function batchDeleteAction()
+    {
+        $page      = $this->get('session')->get('mautic_powerticpipes.pipes_index.page', 1);
+        $returnUrl = $this->generateUrl('mautic_powerticpipes.pipes_index', ['page' => $page]);
+        $flashes   = [];
+
+        $postActionVars = [
+            'returnUrl'       => $returnUrl,
+            'viewParameters'  => ['page' => $page],
+            'contentTemplate' => 'PowerticPipesBundle:Pipes:index',
+            'passthroughVars' => [
+                'activeLink'    => '#mautic_powerticpipes.pipes_index',
+                'mauticContent' => 'powerticpipes',
+            ],
+        ];
+
+        if ('POST' == $this->request->getMethod()) {
+            $model     = $this->getModel($this->getModelName());
+            $ids       = json_decode($this->request->query->get('ids', '{}'));
+            $deleteIds = [];
+
+            // Loop over the IDs to perform access checks pre-delete
+            foreach ($ids as $objectId) {
+                $entity = $model->getEntity($objectId);
+
+                if (null === $entity) {
+                    $flashes[] = [
+                        'type'    => 'error',
+                        'msg'     => 'plugin.powerticpipes.error.notfound',
+                        'msgVars' => ['%id%' => $objectId],
+                    ];
+                } elseif (!$this->get('mautic.security')->isGranted($this->getPermissionBase().':delete')) {
+                    $flashes[] = $this->accessDenied(true);
+                } elseif ($model->isLocked($entity)) {
+                    $flashes[] = $this->isLocked($postActionVars, $entity, 'powerticpipes', true);
+                } else {
+                    $deleteIds[] = $objectId;
+                }
+            }
+
+            // Delete everything we are able to
+            if (!empty($deleteIds)) {
+                $entities = $model->deleteEntities($deleteIds);
+
+                $flashes[] = [
+                    'type'    => 'notice',
+                    'msg'     => 'plugin.powerticpipes.notice.batch_deleted',
+                    'msgVars' => [
+                        '%count%' => count($entities),
+                    ],
+                ];
+            }
+        } //else don't do anything
+
+        return $this->postActionRedirect(
+            array_merge(
+                $postActionVars,
+                [
+                    'flashes' => $flashes,
+                ]
+            )
+        );
+    }
 
     /**
      * Get this controller's model name.

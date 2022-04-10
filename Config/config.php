@@ -9,12 +9,13 @@ return [
             'plugin.powerticpipes.index' => [
                 'iconClass' => 'fa-chevron-circle-right',
                 'route'     => 'mautic_powerticpipes.pipes_index',
-                'priority'  => 99
+                'priority'  => 25
             ]
         ]
     ],
     'routes'   => [
         'main' => [
+            
             'mautic_powerticpipes.pipes_index' => [
                 'path'       => '/powerticpipes/pipes/{page}',
                 'controller' => 'PowerticPipesBundle:Pipes:index',
@@ -48,7 +49,9 @@ return [
         'forms' => [
             'mautic.pipes.type.form' => [
                 'class'     => 'MauticPlugin\PowerticPipesBundle\Form\Type\PipesType',
-                'arguments' => 'mautic.factory',
+                'arguments' => [
+                    'mautic.security',
+                ],
                 'alias'     => 'pipes',
             ],
 

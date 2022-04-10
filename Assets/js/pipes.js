@@ -8,11 +8,25 @@ var kanban;
       itemAddOptions: {
         enabled: true,
         content: mauticLang['plugin.powerticpipes.btn_add_item'],
-        class: 'kanban-title-button btn btn-success btn-block',         // default class of the button
-        footer: true                                                // position the button on footer
+        class: 'kanban-title-button btn btn-success btn-block',
+        footer: true
       },
       itemRemoveOptions: {
         enabled: true,
+      },
+
+      click: function(el){
+        var elm = $(el);
+        $('#MauticSharedModal .loading-placeholder').show();
+        $('#MauticSharedModal .modal-body-content').html('');
+        $('#MauticSharedModal-label').text(mauticLang['plugin.powerticpipes.edit_card']);
+        $('#MauticSharedModal').modal('show');
+        fetch(editCardAction+'/'+elm.data('eid')).then(function(response) {
+          response.text().then(function(data) {
+            $('#MauticSharedModal .loading-placeholder').hide();
+            $('#MauticSharedModal .modal-body-content').html(data);
+          });
+        });
       },
       
       buttonClick: function(el, boardId) {
@@ -25,13 +39,15 @@ var kanban;
         kanban.addForm(boardId, formItem);
         formItem.addEventListener("submit", function(e) {
           e.preventDefault();
+          var itens = kanban.getBoardElements(boardId);
+          
           var text = e.target[0].value;
           formItem.parentNode.removeChild(formItem);
 
           $.post(addCardAction, {
             list_id: boardId,
             name: text,
-            order: kanban.options.boards[3].item.length+1
+            order: itens.length+1
           }, function(data){
             kanban.addElement(boardId, {
               title: text,
@@ -95,6 +111,34 @@ var kanban;
       
     });
   }
+
+  $('body').on('click', '#cards_buttons_apply', function (e){
+    e.preventDefault();
+    var form = $('form[name=cards]');
+    var elm = $(this);
+    elm.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');
+    $.post(form.attr('action'), form.serialize(), function(data){
+      elm.find('i').removeClass('fa-spinner fa-spin').addClass('fa-check');
+      $('[data-eid='+data.id+']').text(data.name);
+    }, 'json')
+  });
+
+  $('body').on('click', '#cards_buttons_save', function (e){
+    e.preventDefault();
+    var form = $('form[name=cards]');
+    var elm = $(this);
+    elm.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');
+    $.post(form.attr('action'), form.serialize(), function(data){
+      elm.find('i').removeClass('fa-spinner fa-spin').addClass('fa-check');
+      $('[data-eid='+data.id+']').text(data.name);
+      $('#MauticSharedModal').modal('hide');
+    }, 'json')
+  });
+
+  $('body').on('click', '#cards_buttons_cancel', function(e){
+    e.preventDefault();
+    $('#MauticSharedModal').modal('hide');
+  })
 
   $('body').on('input', '.kanban-title-board', function(e) {
     var text = $(this).text();

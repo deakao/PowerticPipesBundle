@@ -32,6 +32,9 @@ class Pipes extends FormEntity
     */
     private $lists;
 
+    
+    private $fromStages;
+
     public function __construct()
     {
         $this->lists = new ArrayCollection();
@@ -106,4 +109,14 @@ class Pipes extends FormEntity
         return $this->lists;
     }
 
+    public function getFromStages()
+    {
+        return $this->fromStages;
+    }
+
+    public function setFromStages($stage)
+    {
+        $this->fromStages = $stage;
+        return $this;
+    }
 }
