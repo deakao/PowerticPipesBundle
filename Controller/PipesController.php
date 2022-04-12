@@ -242,7 +242,11 @@ class PipesController extends AbstractStandardFormController
             $boards[$list['id']]['title'] = $list['name'];
             $boards[$list['id']]['item'] = [];
             foreach($list['cards'] as $item) {
-                $boards[$list['id']]['item'][] = ['title' => $item['name'], 'id' => $item['id']];
+                $boards[$list['id']]['item'][] = [
+                    'date' => ($item['dateModified'] ? $item['dateModified']->format('d/m/Y H:i:s') : $item['dateAdded']->format('d/m/Y H:i:s')), 
+                    'title' => $item['name'], 
+                    'id' => $item['id']
+                ];
             }
         }
 

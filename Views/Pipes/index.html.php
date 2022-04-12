@@ -7,12 +7,7 @@ if (!$view['slots']->get('mauticContent')) {
     }
 }
 
-if (!$view['slots']->get('headerTitle')) {
-    if (!isset($headerTitle)) {
-        $headerTitle = 'Mautic';
-    }
-    $view['slots']->set('headerTitle', $view['translator']->trans($headerTitle));
-}
+$view['slots']->set('headerTitle', 'Pipes');
 
 $view['slots']->set(
     'actions',

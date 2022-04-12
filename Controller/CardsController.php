@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Mautic\CoreBundle\Controller\AbstractFormController;
 use Mautic\CoreBundle\Factory\PageHelperFactoryInterface;
+use Mautic\CoreBundle\Helper\DateTimeHelper;
 
 /**
 * Class CardsController.
@@ -43,6 +44,7 @@ class CardsController extends AbstractStandardFormController
                     'notifyChange' => true,
                     'name' => $entity->getName(),
                     'id' => $entity->getId(),
+                    'date' => date('d/m/Y H:i:s'),
                 ]
             );
         }
@@ -80,7 +82,10 @@ class CardsController extends AbstractStandardFormController
 
         $model->saveEntity($entity);
 
-        return new JsonResponse(['id' => $entity->getId()]);
+        return new JsonResponse([
+            'id' => $entity->getId(),
+            'date' => date('d/m/Y H:i:s'),
+        ]);
     }
 
     public function updateSortAction()
@@ -93,7 +98,11 @@ class CardsController extends AbstractStandardFormController
         foreach($cards as $k => $card) {
             $entity = $model->getEntity($card);
             $entity->setSort($orders[$k]);
-            $entity->setList($listEntity);
+            if($entity->getList()->getId() != $this->request->get('list_id')) {
+                $entity->setList($listEntity);
+                $dateModified = new DateTimeHelper();
+                $entity->setDateModified($dateModified->getUtcDateTime());
+            }
             $model->saveEntity($entity);
         }
         return new JsonResponse(['status' => 1]);

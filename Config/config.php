@@ -7,7 +7,8 @@ return [
     'menu' => [
         'main' => [
             'plugin.powerticpipes.index' => [
-                'iconClass' => 'fa-chevron-circle-right',
+                'iconClass' => 'fa-trello',
+                'access'    => 'powerticpipes:pipes:view',
                 'route'     => 'mautic_powerticpipes.pipes_index',
                 'priority'  => 25
             ]
@@ -60,6 +61,29 @@ return [
                 'arguments' => 'mautic.factory',
                 'alias'     => 'lists',
             ],
-        ]
+        ],
+        'integrations' => [
+            'mautic.integration.powerticpipes' => [
+                'class'     => \MauticPlugin\PowerticPipesBundle\Integration\PowerticPipesIntegration::class,
+                'arguments' => [
+                    'event_dispatcher',
+                    'mautic.helper.cache_storage',
+                    'doctrine.orm.entity_manager',
+                    'session',
+                    'request_stack',
+                    'router',
+                    'translator',
+                    'logger',
+                    'mautic.helper.encryption',
+                    'mautic.lead.model.lead',
+                    'mautic.lead.model.company',
+                    'mautic.helper.paths',
+                    'mautic.core.model.notification',
+                    'mautic.lead.model.field',
+                    'mautic.plugin.model.integration_entity',
+                    'mautic.lead.model.dnc',
+                ],
+            ],
+        ],
     ]
 ];

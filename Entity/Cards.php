@@ -120,4 +120,9 @@ class Cards extends FormEntity
       $this->list = $list;
       return $this;
     }
+
+    public function getList()
+    {
+      return $this->list;
+    }
 }

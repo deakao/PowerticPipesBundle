@@ -90,6 +90,9 @@
   transform: rotate(3deg);
   height: auto !important;
 }
+.kanban-item-date{
+  font-style: italic;
+}
 
 /* Dragula CSS  */
 .gu-mirror {

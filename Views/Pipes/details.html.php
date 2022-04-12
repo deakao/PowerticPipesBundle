@@ -10,9 +10,6 @@
  */
 echo $view['assets']->includeStylesheet('plugins/PowerticPipesBundle/Assets/css/jkanban.min.css');
 
-echo $view['assets']->includeScript('plugins/PowerticPipesBundle/Assets/js/jkanban.min.js');
-echo $view['assets']->includeScript('plugins/PowerticPipesBundle/Assets/js/pipes.js');
-
 $view->extend('MauticCoreBundle:Default:content.html.php');
 $view['slots']->set('headerTitle', $entity->getName());
 
@@ -101,3 +98,8 @@ $view['slots']->set(
     <!--/ left section -->
 </div>
 <!--/ end: box layout -->
+<?php 
+echo $view['assets']->includeScript('plugins/PowerticPipesBundle/Assets/js/jkanban.min.js');
+
+echo $view['assets']->includeScript('plugins/PowerticPipesBundle/Assets/js/pipes.js', 'composePipeWatcher', 'composePipeWatcher');
+?>

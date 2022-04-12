@@ -1,165 +1,171 @@
 var kanban;
-(function($) {
-  var boards = document.getElementById('myKanban');
 
-  if(boards) {
-    kanban = new jKanban({
-      element:'#myKanban',
-      itemAddOptions: {
-        enabled: true,
-        content: mauticLang['plugin.powerticpipes.btn_add_item'],
-        class: 'kanban-title-button btn btn-success btn-block',
-        footer: true
-      },
-      itemRemoveOptions: {
-        enabled: true,
-      },
+Mautic.composePipeWatcher = function(container) {
 
-      click: function(el){
-        var elm = $(el);
-        $('#MauticSharedModal .loading-placeholder').show();
-        $('#MauticSharedModal .modal-body-content').html('');
-        $('#MauticSharedModal-label').text(mauticLang['plugin.powerticpipes.edit_card']);
-        $('#MauticSharedModal').modal('show');
-        fetch(editCardAction+'/'+elm.data('eid')).then(function(response) {
-          response.text().then(function(data) {
-            $('#MauticSharedModal .loading-placeholder').hide();
-            $('#MauticSharedModal .modal-body-content').html(data);
-          });
-        });
-      },
-      
-      buttonClick: function(el, boardId) {
-        // create a form to enter element
-        var formItem = document.createElement("form");
-        formItem.setAttribute("class", "itemform");
-        formItem.innerHTML =
-          '<div class="form-group"><textarea class="form-control" rows="2" autofocus></textarea></div><div class="pb-md"> <button type="submit" class="btn btn-primary btn-xs pull-right">'+mauticLang['plugin.powerticpipes.add']+'</button> <button type="button" id="CancelBtn" class="btn btn-danger btn-xs pull-right mr-xs">'+mauticLang['plugin.powerticpipes.cancel']+'</button> </div>';
 
-        kanban.addForm(boardId, formItem);
-        formItem.addEventListener("submit", function(e) {
-          e.preventDefault();
-          var itens = kanban.getBoardElements(boardId);
-          
-          var text = e.target[0].value;
-          formItem.parentNode.removeChild(formItem);
+      kanban = new jKanban({
+        element:'#myKanban',
+        itemAddOptions: {
+          enabled: true,
+          content: mauticLang['plugin.powerticpipes.btn_add_item'],
+          class: 'kanban-title-button btn btn-success btn-block',
+          footer: true
+        },
+        itemRemoveOptions: {
+          enabled: true,
+        },
 
-          $.post(addCardAction, {
-            list_id: boardId,
-            name: text,
-            order: itens.length+1
-          }, function(data){
-            kanban.addElement(boardId, {
-              title: text,
-              id: data.id,
+        click: function(el){
+          var elm = jQuery(el);
+          jQuery('#MauticSharedModal .loading-placeholder').show();
+          jQuery('#MauticSharedModal .modal-body-content').html('');
+          jQuery('#MauticSharedModal-label').text(mauticLang['plugin.powerticpipes.edit_card']);
+          jQuery('#MauticSharedModal').modal('show');
+          fetch(editCardAction+'/'+elm.data('eid')).then(function(response) {
+            response.text().then(function(data) {
+              jQuery('#MauticSharedModal .loading-placeholder').hide();
+              jQuery('#MauticSharedModal .modal-body-content').html(data);
             });
           });
-        });
-
-        document.getElementById("CancelBtn").onclick = function() {
-          formItem.parentNode.removeChild(formItem);
-        };
-      },
-      dragendBoard: function (el) {
-        var lists = $('.kanban-container')
-        var post_data = {};
-        lists.find('.kanban-board').each(function(index, el) {
-          post_data['list_id['+index+']'] = $(el).attr('data-id').replace('id_', '');
-          post_data['order['+index+']'] = index+1;
-        });
-        $.post(updateListSortAction, post_data);
-      },
-      dragendEl: function (item) {
-        var elm = $(item).parents('.kanban-board');
-        var post_data = {
-          'list_id': elm.attr('data-id').replace('id_', ''),
-        }
-        elm.find('.kanban-item').each(function(index, el) {
-          post_data['card_id['+index+']'] = $(el).attr('data-eid');
-          post_data['order['+index+']'] = index+1;
-        });
-        $.post(updateCardSortAction, post_data);
-      },
-      buttonRemoveClick: function(el, boardId) {
-        if(confirm(mauticLang['plugin.powerticpipes.confirm_delete_list'])){
-          $(el).parents('.kanban-board').fadeOut(function(){
-            $(this).remove();
-          });
-          $.get(removeListAction+'/'+boardId.replace('id_', ''));
-        }
+        },
         
-      },
-      
-      boards: kanban_content
-    });
+        buttonClick: function(el, boardId) {
+          // create a form to enter element
+          var formItem = document.createElement("form");
+          formItem.setAttribute("class", "itemform");
+          formItem.innerHTML =
+            '<div class="form-group"><textarea class="form-control" rows="2" autofocus></textarea></div><div class="pb-md"> <button type="submit" class="btn btn-primary btn-xs pull-right">'+mauticLang['plugin.powerticpipes.add']+'</button> <button type="button" id="CancelBtn" class="btn btn-danger btn-xs pull-right mr-xs">'+mauticLang['plugin.powerticpipes.cancel']+'</button> </div>';
 
+          kanban.addForm(boardId, formItem);
+          formItem.addEventListener("submit", function(e) {
+            e.preventDefault();
+            var itens = kanban.getBoardElements(boardId);
+            
+            var text = e.target[0].value;
+            formItem.parentNode.removeChild(formItem);
 
-    $('#add_list').on('click', function(e) {
-      e.preventDefault();
-      var elm = $(this)
-      var post_data = {
-        'order': (kanban.options.boards.length+1)
-      }
-      $.post(elm.attr('href'), post_data, function(data){
-        kanban.addBoards([
-          {
-            id: data.list_id,
-            title: data.name,
-          }]
-        );
-      }, 'json')
-      
-    });
-  }
+            jQuery.post(addCardAction, {
+              list_id: boardId,
+              name: text,
+              order: itens.length+1
+            }, function(data){
+              kanban.addElement(boardId, {
+                title: text,
+                id: data.id,
+                date: data.date
+              });
+            });
+          });
 
-  $('body').on('click', '#cards_buttons_apply', function (e){
-    e.preventDefault();
-    var form = $('form[name=cards]');
-    var elm = $(this);
-    elm.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');
-    $.post(form.attr('action'), form.serialize(), function(data){
-      elm.find('i').removeClass('fa-spinner fa-spin').addClass('fa-check');
-      $('[data-eid='+data.id+']').text(data.name);
-    }, 'json')
-  });
+          document.getElementById("CancelBtn").onclick = function() {
+            formItem.parentNode.removeChild(formItem);
+          };
+        },
+        dragendBoard: function (el) {
+          var lists = jQuery('.kanban-container')
+          var post_data = {};
+          lists.find('.kanban-board').each(function(index, el) {
+            post_data['list_id['+index+']'] = jQuery(el).attr('data-id').replace('id_', '');
+            post_data['order['+index+']'] = index+1;
+          });
+          jQuery.post(updateListSortAction, post_data);
+        },
+        dragendEl: function (item) {
+          console.log(item);
+          var elm = jQuery(item).parents('.kanban-board');
+          var post_data = {
+            'list_id': elm.attr('data-id').replace('id_', ''),
+          }
+          elm.find('.kanban-item').each(function(index, el) {
+            post_data['card_id['+index+']'] = jQuery(el).attr('data-eid');
+            post_data['order['+index+']'] = index+1;
+          });
+          jQuery.post(updateCardSortAction, post_data);
+          var utc = new Date().toJSON();
+          jQuery(item).find('.kanban-item-date').text(utc.slice(0,10).split('-').reverse().join('/')+' '+utc.slice(11,19));
 
-  $('body').on('click', '#cards_buttons_save', function (e){
-    e.preventDefault();
-    var form = $('form[name=cards]');
-    var elm = $(this);
-    elm.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');
-    $.post(form.attr('action'), form.serialize(), function(data){
-      elm.find('i').removeClass('fa-spinner fa-spin').addClass('fa-check');
-      $('[data-eid='+data.id+']').text(data.name);
-      $('#MauticSharedModal').modal('hide');
-    }, 'json')
-  });
-
-  $('body').on('click', '#cards_buttons_cancel', function(e){
-    e.preventDefault();
-    $('#MauticSharedModal').modal('hide');
-  })
-
-  $('body').on('input', '.kanban-title-board', function(e) {
-    var text = $(this).text();
-    var id = $(this).parents('.kanban-board').attr('data-id').replace('id_', '');
-    var post_data = {
-      'name': text,
-      'list_id': id
-    }
-    $.post(updateListNameAction, post_data)
-  });
-
-  $('body').on('click', '.kanban-item-remove', function(e) {
-    e.preventDefault();
-    var elm = $(this)
-    var id = elm.parents('.kanban-item').attr('data-eid');
-    if(confirm(mauticLang['plugin.powerticpipes.confirm_delete_card'])){
-      $.get(removeCardAction+'/'+id.replace('id_', ''));
-      elm.parents('.kanban-item').fadeOut(function(){
-        elm.parents('.kanban-item').remove();
+        },
+        buttonRemoveClick: function(el, boardId) {
+          if(confirm(mauticLang['plugin.powerticpipes.confirm_delete_list'])){
+            jQuery(el).parents('.kanban-board').fadeOut(function(){
+              jQuery(this).remove();
+            });
+            jQuery.get(removeListAction+'/'+boardId.replace('id_', ''));
+          }
+          
+        },
+        
+        boards: kanban_content
       });
-    }
-  });
-  
-})(jQuery);
+
+      jQuery('#add_list').on('click', function(e) {
+          e.preventDefault();
+          var elm = jQuery(this)
+          var post_data = {
+            'order': (kanban.options.boards.length+1)
+          }
+          
+          jQuery.post(elm.attr('href'), post_data, function(data){
+            elm.find('.fa').removeClass('fa-spinner fa-spin').addClass('fa-plus');
+            kanban.addBoards([
+              {
+                id: data.list_id,
+                title: data.name,
+              }]
+            );
+          }, 'json')
+          
+        });
+
+      jQuery('body').on('click', '#cards_buttons_apply', function (e){
+        e.preventDefault();
+        var form = jQuery('form[name=cards]');
+        var elm = jQuery(this);
+        elm.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');
+        jQuery.post(form.attr('action'), form.serialize(), function(data){
+          elm.find('i').removeClass('fa-spinner fa-spin').addClass('fa-check');
+          var item = jQuery('[data-eid='+data.id+']')
+          item.find('.kanban-item-title').text(data.name);
+        }, 'json')
+      });
+
+      jQuery('body').on('click', '#cards_buttons_save', function (e){
+        e.preventDefault();
+        var form = jQuery('form[name=cards]');
+        var elm = jQuery(this);
+        elm.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');
+        jQuery.post(form.attr('action'), form.serialize(), function(data){
+          elm.find('i').removeClass('fa-spinner fa-spin').addClass('fa-check');
+          var item = jQuery('[data-eid='+data.id+']')
+          item.find('.kanban-item-title').text(data.name);
+          jQuery('#MauticSharedModal').modal('hide');
+        }, 'json')
+      });
+
+      jQuery('body').on('click', '#cards_buttons_cancel', function(e){
+        e.preventDefault();
+        jQuery('#MauticSharedModal').modal('hide');
+      })
+
+      jQuery('body').on('input', '.kanban-title-board', function(e) {
+        var text = jQuery(this).text();
+        var id = jQuery(this).parents('.kanban-board').attr('data-id').replace('id_', '');
+        var post_data = {
+          'name': text,
+          'list_id': id
+        }
+        jQuery.post(updateListNameAction, post_data)
+      });
+
+      jQuery('body').on('click', '.kanban-item-remove', function(e) {
+        e.preventDefault();
+        var elm = jQuery(this)
+        var id = elm.parents('.kanban-item').attr('data-eid');
+        if(confirm(mauticLang['plugin.powerticpipes.confirm_delete_card'])){
+          jQuery.get(removeCardAction+'/'+id.replace('id_', ''));
+          elm.parents('.kanban-item').fadeOut(function(){
+            elm.parents('.kanban-item').remove();
+          });
+        }
+      });
+}
