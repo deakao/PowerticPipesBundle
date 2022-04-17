@@ -5,6 +5,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
 use Mautic\CoreBundle\Entity\FormEntity;
 use Doctrine\Common\Collections\ArrayCollection;
+use Mautic\LeadBundle\Entity\Lead;
 
 class Cards extends FormEntity
 {
@@ -28,7 +29,15 @@ class Cards extends FormEntity
   */
   private $description;
 
+  /**
+   * @var Lists
+   */
   private $list;
+
+  /**
+   * @var Lead
+   */
+  private $lead;
   
   
   public function __construct()
@@ -48,10 +57,16 @@ class Cards extends FormEntity
             ->inversedBy('lists')
             ->addJoinColumn('list_id', 'id', false, false, 'CASCADE')
             ->build();
-
+    
     $builder->createField('sort', 'integer')
             ->columnName('sort')
             ->nullable()
+            ->build();
+
+    $builder->createOneToOne('lead', Lead::class)
+            ->cascadeMerge()
+            ->cascadeDetach()
+            ->addJoinColumn('lead_id', 'id', true, false, 'SET NULL')
             ->build();
 
     $builder->addIdColumns();
@@ -124,5 +139,16 @@ class Cards extends FormEntity
     public function getList()
     {
       return $this->list;
+    }
+
+    public function getLead()
+    {
+      return $this->lead;
+    }
+
+    public function setLead($lead)
+    {
+      $this->lead = $lead;
+      return $this;
     }
 }

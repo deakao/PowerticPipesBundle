@@ -37,6 +37,12 @@ class CardsController extends AbstractStandardFormController
             $post = $this->request->get('cards');
             $entity->setName($post['name']);
             $entity->setDescription($post['description']);
+            if($post['lead']){
+                $lead = $this->getModel('lead')->getEntity($post['lead']);
+                $entity->setLead($lead);
+            } else {
+                $entity->setLead(null);
+            }
             $model->saveEntity($entity);
             return new JsonResponse(
                 [

@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Mautic\CoreBundle\Form\Type\FormButtonsType;
 use Mautic\CoreBundle\Form\Type\YesNoButtonGroupType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -31,6 +32,29 @@ class CardsType extends AbstractType
             'attr'       => ['class' => 'form-control editor'],
             'required'   => false,
         ]);
+
+        $choices = [];
+        $preferred_choices = null;
+        if($options['data'] and $options['data']->getLead()){
+            $lead = $options['data']->getLead();
+            $choices[$lead->getFirstName(). ' '.$lead->getLastName(). '('.$lead->getEmail().')'] = $lead->getId();
+            $preferred_choices = $options['data']->getLead()->getId();
+        }
+
+        $builder->add('lead', ChoiceType::class, [
+            'label'      => 'mautic.lead.contact',
+            'label_attr' => [
+                'class' => 'control-label',
+            ], 
+            'attr' => [
+                'class' => 'form-control',
+            ], 
+            'required'   => false,
+            'choices' => $choices,
+            'choice_value' => $preferred_choices
+            
+        ]);
+            
         
         $builder->add('buttons', FormButtonsType::class);
     }

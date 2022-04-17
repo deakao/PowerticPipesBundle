@@ -16,15 +16,29 @@ Mautic.composePipeWatcher = function(container) {
         },
 
         click: function(el){
-          var elm = jQuery(el);
-          jQuery('#MauticSharedModal .loading-placeholder').show();
-          jQuery('#MauticSharedModal .modal-body-content').html('');
-          jQuery('#MauticSharedModal-label').text(mauticLang['plugin.powerticpipes.edit_card']);
-          jQuery('#MauticSharedModal').modal('show');
+          var elm = mQuery(el);
+          mQuery('#MauticSharedModal .loading-placeholder').show();
+          mQuery('#MauticSharedModal .modal-body-content').html('');
+          mQuery('#MauticSharedModal-label').text(mauticLang['plugin.powerticpipes.edit_card']);
+          mQuery('#MauticSharedModal').modal('show');
           fetch(editCardAction+'/'+elm.data('eid')).then(function(response) {
             response.text().then(function(data) {
-              jQuery('#MauticSharedModal .loading-placeholder').hide();
-              jQuery('#MauticSharedModal .modal-body-content').html(data);
+              mQuery('#MauticSharedModal .loading-placeholder').hide();
+              mQuery('#MauticSharedModal .modal-body-content').html(data);
+              mQuery('#MauticSharedModal #cards_lead').chosen({width: '100%'}).ajaxChosen({
+                type: 'GET',
+                url: mauticAjaxUrl+'?action=plugin:powerticPipes:searchContact',
+                dataType: 'json',
+              }, function (data) {
+                  var results = [];
+                  mQuery.each( data.leads, function(i,  item ) {
+                    results.push({ value: item.value, text: item.label });
+                  });
+                  return results;
+              
+              });
+              
+              
             });
           });
         },
