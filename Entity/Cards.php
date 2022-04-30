@@ -63,10 +63,9 @@ class Cards extends FormEntity
             ->nullable()
             ->build();
 
-    $builder->createOneToOne('lead', Lead::class)
-            ->cascadeMerge()
-            ->cascadeDetach()
-            ->addJoinColumn('lead_id', 'id', true, false, 'SET NULL')
+    $builder->createManyToOne('lead', Lead::class)
+            ->inversedBy('leads')
+            ->addJoinColumn('lead_id', 'id', true, false, 'CASCADE')
             ->build();
 
     $builder->addIdColumns();

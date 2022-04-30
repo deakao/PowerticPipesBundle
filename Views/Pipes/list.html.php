@@ -14,6 +14,7 @@ if (!isset($sessionVar)) {
 if (!isset($nameAction)) {
     $nameAction = 'view';
 }
+$view['slots']->set('headerTitle', 'Pipes');
 
 if (count($items)):
     if ($items instanceof \Doctrine\ORM\Tools\Pagination\Paginator):

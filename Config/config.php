@@ -2,7 +2,7 @@
 return [
     'name' => 'Powertic Pipes',
     'description' => 'Pipes',
-    'version' => '0.4',
+    'version' => '0.5',
     'author' => 'Denis Akao',
     'menu' => [
         'main' => [

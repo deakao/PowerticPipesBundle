@@ -33,6 +33,9 @@ class CardsController extends AbstractStandardFormController
         $action = $this->generateUrl('mautic_powerticpipes.cards_action', ['objectAction' => 'edit', 'objectId' => $objectId]);
         $editForm = $model->createForm($entity, $this->get('form.factory'), $action);
 
+        $lead = $entity->getLead();
+        
+
         if (!$ignorePost && 'POST' == $this->request->getMethod()) {
             $post = $this->request->get('cards');
             $entity->setName($post['name']);
@@ -44,6 +47,17 @@ class CardsController extends AbstractStandardFormController
                 $entity->setLead(null);
             }
             $model->saveEntity($entity);
+
+            $lead_content = [];
+            if ($lead) {
+                $lead_content = [
+                    'id' => $lead->getId(),
+                    'name' => $lead->getFirstname() . ' ' . $lead->getLastname(),
+                    'email' => $lead->getEmail(),
+                ];
+            }
+            
+
             return new JsonResponse(
                 [
                     'closeModal' => true,
@@ -51,6 +65,7 @@ class CardsController extends AbstractStandardFormController
                     'name' => $entity->getName(),
                     'id' => $entity->getId(),
                     'date' => date('d/m/Y H:i:s'),
+                    'lead' => $lead_content
                 ]
             );
         }
@@ -80,6 +95,8 @@ class CardsController extends AbstractStandardFormController
         if (!$this->get('mautic.security')->isGranted('powerticpipes:cards:create')) {
             return $this->accessDenied();
         }
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+        
         $entity->setName($this->request->get('card'));
         $list = $this->getModel('powerticpipes.lists')->getEntity(str_replace('id_', '', $this->request->get('list_id')));
         $entity->setList($list);
@@ -91,6 +108,7 @@ class CardsController extends AbstractStandardFormController
         return new JsonResponse([
             'id' => $entity->getId(),
             'date' => date('d/m/Y H:i:s'),
+            'creator' => $user->getName(),
         ]);
     }
 

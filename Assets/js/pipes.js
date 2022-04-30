@@ -66,7 +66,8 @@ Mautic.composePipeWatcher = function(container) {
               kanban.addElement(boardId, {
                 title: text,
                 id: data.id,
-                date: data.date
+                date: data.date,
+                creator: data.creator,
               });
             });
           });
@@ -138,7 +139,11 @@ Mautic.composePipeWatcher = function(container) {
         elm.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');
         jQuery.post(form.attr('action'), form.serialize(), function(data){
           elm.find('i').removeClass('fa-spinner fa-spin').addClass('fa-check');
-          var item = jQuery('[data-eid='+data.id+']')
+          var item = jQuery('[data-eid='+data.id+']');
+          item.find('.kanban-item-lead').remove();
+          if(typeof data.lead != 'undefined' && typeof data.lead.name != 'undefined'){
+            item.find('.kanban-item-creator').after('<div class="kanban-item-lead text-right small"><b>Contato:</b> <span>'+data.lead.name+'</span></div>');
+          }
           item.find('.kanban-item-title').text(data.name);
         }, 'json')
       });
@@ -152,6 +157,10 @@ Mautic.composePipeWatcher = function(container) {
           elm.find('i').removeClass('fa-spinner fa-spin').addClass('fa-check');
           var item = jQuery('[data-eid='+data.id+']')
           item.find('.kanban-item-title').text(data.name);
+          item.find('.kanban-item-lead').remove();
+          if(typeof data.lead != 'undefined' && typeof data.lead.name != 'undefined'){
+            item.find('.kanban-item-creator').after('<div class="kanban-item-lead text-right small"><b>Contato:</b> <span>'+data.lead.name+'</span></div>');
+          }
           jQuery('#MauticSharedModal').modal('hide');
         }, 'json')
       });
