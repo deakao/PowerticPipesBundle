@@ -101,5 +101,5 @@ $view['slots']->set(
 <?php 
 echo $view['assets']->includeScript('plugins/PowerticPipesBundle/Assets/js/jkanban.min.js');
 
-echo $view['assets']->includeScript('plugins/PowerticPipesBundle/Assets/js/pipes.js', 'composePipeWatcher', 'composePipeWatcher');
+echo $view['assets']->includeScript('plugins/PowerticPipesBundle/Assets/js/pipes.js', 'composePipeCreate', 'composePipeWatcher');
 ?>

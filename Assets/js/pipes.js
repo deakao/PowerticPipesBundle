@@ -1,22 +1,13 @@
 var kanban;
-
 Mautic.composePipeWatcher = function(container) {
+  createKanban();
+};
+Mautic.composePipeCreate = function(container) {
 
-
-      kanban = new jKanban({
-        element:'#myKanban',
-        itemAddOptions: {
-          enabled: true,
-          content: mauticLang['plugin.powerticpipes.btn_add_item'],
-          class: 'kanban-title-button btn btn-success btn-block',
-          footer: true
-        },
-        itemRemoveOptions: {
-          enabled: true,
-        },
-
-        click: function(el){
-          var elm = mQuery(el);
+  createKanban();
+      mQuery('body').on('click', '.kanban-item-title', function(e){
+        e.preventDefault();
+        var elm = mQuery(this).parents('.kanban-item');
           mQuery('#MauticSharedModal .loading-placeholder').show();
           mQuery('#MauticSharedModal .modal-body-content').html('');
           mQuery('#MauticSharedModal-label').text(mauticLang['plugin.powerticpipes.edit_card']);
@@ -41,8 +32,102 @@ Mautic.composePipeWatcher = function(container) {
               
             });
           });
+      });
+
+      mQuery('body').on('click', '#add_list', function(e){
+          e.preventDefault();
+          var elm = mQuery(this)
+          var post_data = {
+            'order': (kanban.options.boards.length+1)
+          }
+          
+          mQuery.post(elm.attr('href'), post_data, function(data){
+            elm.find('.fa').removeClass('fa-spinner fa-spin').addClass('fa-plus');
+            kanban.addBoards([
+              {
+                id: data.list_id,
+                title: data.name,
+              }]
+            );
+          }, 'json')
+          
+        });
+
+      mQuery('body').on('click', '#cards_buttons_apply', function (e){
+        e.preventDefault();
+        var form = mQuery('form[name=cards]');
+        var elm = mQuery(this);
+        elm.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');
+        mQuery.post(form.attr('action'), form.serialize(), function(data){
+          elm.find('i').removeClass('fa-spinner fa-spin').addClass('fa-check');
+          var item = mQuery('[data-eid='+data.id+']');
+          item.find('.kanban-item-lead').remove();
+          if(typeof data.lead != 'undefined' && typeof data.lead.name != 'undefined'){
+            item.find('.kanban-item-creator').after('<div class="kanban-item-lead text-right small"><b>Contato:</b> <span>'+data.lead.name+'</span></div>');
+          }
+          item.find('.kanban-item-title').text(data.name);
+        }, 'json')
+      });
+
+      mQuery('body').on('click', '#cards_buttons_save', function (e){
+        e.preventDefault();
+        var form = mQuery('form[name=cards]');
+        var elm = mQuery(this);
+        elm.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');
+        mQuery.post(form.attr('action'), form.serialize(), function(data){
+          elm.find('i').removeClass('fa-spinner fa-spin').addClass('fa-check');
+          var item = mQuery('[data-eid='+data.id+']')
+          item.find('.kanban-item-title').text(data.name);
+          item.find('.kanban-item-lead').remove();
+          if(typeof data.lead != 'undefined' && typeof data.lead.name != 'undefined'){
+            item.find('.kanban-item-creator').after('<div class="kanban-item-lead text-right small"><b>Contato:</b> <span>'+data.lead.name+'</span></div>');
+          }
+          mQuery('#MauticSharedModal').modal('hide');
+        }, 'json')
+      });
+
+      mQuery('body').on('click', '#cards_buttons_cancel', function(e){
+        e.preventDefault();
+        mQuery('#MauticSharedModal').modal('hide');
+      })
+
+      mQuery('body').on('input', '.kanban-title-board', function(e) {
+        var text = mQuery(this).text();
+        var id = mQuery(this).parents('.kanban-board').attr('data-id').replace('id_', '');
+        var post_data = {
+          'name': text,
+          'list_id': id
+        }
+        mQuery.post(updateListNameAction, post_data)
+      });
+
+      mQuery('body').on('click', '.kanban-item-remove', function(e) {
+        e.preventDefault();
+        var elm = mQuery(this)
+        var id = elm.parents('.kanban-item').attr('data-eid');
+        if(confirm(mauticLang['plugin.powerticpipes.confirm_delete_card'])){
+          mQuery.get(removeCardAction+'/'+id.replace('id_', ''));
+          elm.parents('.kanban-item').fadeOut(function(){
+            elm.parents('.kanban-item').remove();
+          });
+        }
+      });
+}
+
+function createKanban(){
+
+      kanban = new jKanban({
+        element:'#myKanban',
+        itemAddOptions: {
+          enabled: true,
+          content: mauticLang['plugin.powerticpipes.btn_add_item'],
+          class: 'kanban-title-button btn btn-success btn-block',
+          footer: true
         },
-        
+        itemRemoveOptions: {
+          enabled: true,
+        },
+
         buttonClick: function(el, boardId) {
           // create a form to enter element
           var formItem = document.createElement("form");
@@ -58,7 +143,7 @@ Mautic.composePipeWatcher = function(container) {
             var text = e.target[0].value;
             formItem.parentNode.removeChild(formItem);
 
-            jQuery.post(addCardAction, {
+            mQuery.post(addCardAction, {
               list_id: boardId,
               name: text,
               order: itens.length+1
@@ -77,118 +162,39 @@ Mautic.composePipeWatcher = function(container) {
           };
         },
         dragendBoard: function (el) {
-          var lists = jQuery('.kanban-container')
+          var lists = mQuery('.kanban-container')
           var post_data = {};
           lists.find('.kanban-board').each(function(index, el) {
-            post_data['list_id['+index+']'] = jQuery(el).attr('data-id').replace('id_', '');
+            post_data['list_id['+index+']'] = mQuery(el).attr('data-id').replace('id_', '');
             post_data['order['+index+']'] = index+1;
           });
-          jQuery.post(updateListSortAction, post_data);
+          mQuery.post(updateListSortAction, post_data);
         },
         dragendEl: function (item) {
           console.log(item);
-          var elm = jQuery(item).parents('.kanban-board');
+          var elm = mQuery(item).parents('.kanban-board');
           var post_data = {
             'list_id': elm.attr('data-id').replace('id_', ''),
           }
           elm.find('.kanban-item').each(function(index, el) {
-            post_data['card_id['+index+']'] = jQuery(el).attr('data-eid');
+            post_data['card_id['+index+']'] = mQuery(el).attr('data-eid');
             post_data['order['+index+']'] = index+1;
           });
-          jQuery.post(updateCardSortAction, post_data);
+          mQuery.post(updateCardSortAction, post_data);
           var utc = new Date().toJSON();
-          jQuery(item).find('.kanban-item-date').text(utc.slice(0,10).split('-').reverse().join('/')+' '+utc.slice(11,19));
+          mQuery(item).find('.kanban-item-date').text(utc.slice(0,10).split('-').reverse().join('/')+' '+utc.slice(11,19));
 
         },
         buttonRemoveClick: function(el, boardId) {
           if(confirm(mauticLang['plugin.powerticpipes.confirm_delete_list'])){
-            jQuery(el).parents('.kanban-board').fadeOut(function(){
-              jQuery(this).remove();
+            mQuery(el).parents('.kanban-board').fadeOut(function(){
+              mQuery(this).remove();
             });
-            jQuery.get(removeListAction+'/'+boardId.replace('id_', ''));
+            mQuery.get(removeListAction+'/'+boardId.replace('id_', ''));
           }
           
         },
         
         boards: kanban_content
-      });
-
-      jQuery('#add_list').on('click', function(e) {
-          e.preventDefault();
-          var elm = jQuery(this)
-          var post_data = {
-            'order': (kanban.options.boards.length+1)
-          }
-          
-          jQuery.post(elm.attr('href'), post_data, function(data){
-            elm.find('.fa').removeClass('fa-spinner fa-spin').addClass('fa-plus');
-            kanban.addBoards([
-              {
-                id: data.list_id,
-                title: data.name,
-              }]
-            );
-          }, 'json')
-          
-        });
-
-      jQuery('body').on('click', '#cards_buttons_apply', function (e){
-        e.preventDefault();
-        var form = jQuery('form[name=cards]');
-        var elm = jQuery(this);
-        elm.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');
-        jQuery.post(form.attr('action'), form.serialize(), function(data){
-          elm.find('i').removeClass('fa-spinner fa-spin').addClass('fa-check');
-          var item = jQuery('[data-eid='+data.id+']');
-          item.find('.kanban-item-lead').remove();
-          if(typeof data.lead != 'undefined' && typeof data.lead.name != 'undefined'){
-            item.find('.kanban-item-creator').after('<div class="kanban-item-lead text-right small"><b>Contato:</b> <span>'+data.lead.name+'</span></div>');
-          }
-          item.find('.kanban-item-title').text(data.name);
-        }, 'json')
-      });
-
-      jQuery('body').on('click', '#cards_buttons_save', function (e){
-        e.preventDefault();
-        var form = jQuery('form[name=cards]');
-        var elm = jQuery(this);
-        elm.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');
-        jQuery.post(form.attr('action'), form.serialize(), function(data){
-          elm.find('i').removeClass('fa-spinner fa-spin').addClass('fa-check');
-          var item = jQuery('[data-eid='+data.id+']')
-          item.find('.kanban-item-title').text(data.name);
-          item.find('.kanban-item-lead').remove();
-          if(typeof data.lead != 'undefined' && typeof data.lead.name != 'undefined'){
-            item.find('.kanban-item-creator').after('<div class="kanban-item-lead text-right small"><b>Contato:</b> <span>'+data.lead.name+'</span></div>');
-          }
-          jQuery('#MauticSharedModal').modal('hide');
-        }, 'json')
-      });
-
-      jQuery('body').on('click', '#cards_buttons_cancel', function(e){
-        e.preventDefault();
-        jQuery('#MauticSharedModal').modal('hide');
-      })
-
-      jQuery('body').on('input', '.kanban-title-board', function(e) {
-        var text = jQuery(this).text();
-        var id = jQuery(this).parents('.kanban-board').attr('data-id').replace('id_', '');
-        var post_data = {
-          'name': text,
-          'list_id': id
-        }
-        jQuery.post(updateListNameAction, post_data)
-      });
-
-      jQuery('body').on('click', '.kanban-item-remove', function(e) {
-        e.preventDefault();
-        var elm = jQuery(this)
-        var id = elm.parents('.kanban-item').attr('data-eid');
-        if(confirm(mauticLang['plugin.powerticpipes.confirm_delete_card'])){
-          jQuery.get(removeCardAction+'/'+id.replace('id_', ''));
-          elm.parents('.kanban-item').fadeOut(function(){
-            elm.parents('.kanban-item').remove();
-          });
-        }
       });
 }

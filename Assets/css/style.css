@@ -196,3 +196,6 @@
 .chosen-search-input{
   width: 100% !important;
 }
+.kanban-item-title{
+  cursor: pointer;
+}

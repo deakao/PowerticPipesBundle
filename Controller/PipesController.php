@@ -89,6 +89,8 @@ class PipesController extends AbstractStandardFormController
                     if($post['fromStages']){
                         $listModel = $this->getModel('powerticpipes.lists');
                         $stageModel = $this->getModel('stage');
+                        $leadModel = $this->getModel('lead');
+                        $cardModel = $this->getModel('powerticpipes.cards');
 
                         $stagesPublished = $stageModel->getEntities(
                             [
@@ -109,6 +111,28 @@ class PipesController extends AbstractStandardFormController
                             $listEntity->setSort($k);
                             $listEntity->setPipe($entity);
                             $listModel->saveEntity($listEntity);
+                            $list_id = $listEntity->getId();
+                            $leads = $leadModel->getEntities(
+                                [
+                                    'filter' => [
+                                        'force' => [
+                                            [
+                                                'column' => 'l.stage_id',
+                                                'expr'   => 'eq',
+                                                'value'  => $stage->getId(),
+                                            ],
+                                        ],
+                                    ],
+                                ]
+                            );
+                            foreach($leads as $lead){
+                                $cardEntity = $cardModel->getEntity();
+                                $cardEntity->setList($listEntity);
+                                $cardEntity->setLead($lead);
+                                $cardEntity->setName($lead->getFirstname().' '.$lead->getLastname());
+                                $cardModel->saveEntity($cardEntity);
+                            }
+                            
                         }
                     }
 
@@ -129,10 +153,8 @@ class PipesController extends AbstractStandardFormController
                     );
 
                     if ($form->get('buttons')->get('save')->isClicked()) {
-                        $returnUrl = $this->generateUrl('mautic_powerticpipes.pipes_index', $viewParameters);
-                        $template  = 'PowerticPipesBundle:Pipes:index';
+                        return $this->viewAction($entity->getId());
                     } else {
-                        //return edit view so that all the session stuff is loaded
                         return $this->editAction($entity->getId(), true);
                     }
                 }
