@@ -54,9 +54,9 @@ class LeadSubscriber implements EventSubscriberInterface
             $listPipeStage = $this->listsModel->getRepository()->findBy(['pipe' => $currentList->getPipe(), 'stage' => $stageEntityTo]);
             if(!empty($listPipeStage)){
               $card->setList($listPipeStage[0]);
-              $this->cardsModel->saveEntity($card);
             }
           }
+          $this->cardsModel->saveEntities($cards);
         }
       }
     }
