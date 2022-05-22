@@ -17,6 +17,16 @@ class CardsRepository extends CommonRepository
             ->select($this->getTableAlias() . '')
             ->from('PowerticPipesBundle:Cards', $this->getTableAlias(), $this->getTableAlias() . '.id');
 
+        if(isset($args['list_id'])){
+            $q->andWhere($this->getTableAlias() . '.list = :list_id')
+                ->setParameter('list_id', $args['list_id']);
+        }
+
+        if(isset($args['lead_id'])){
+            $q->andWhere($this->getTableAlias() . '.lead = :lead_id')
+                ->setParameter('lead_id', $args['lead_id']);
+        }
+
         $args['qb'] = $q;
 
         return parent::getEntities($args);

@@ -42,7 +42,6 @@ class Cards extends FormEntity
   
   public function __construct()
   {
-    $this->pipes = new ArrayCollection();
   }
 
   public static function loadMetadata(ORM\ClassMetadata $metadata)
@@ -91,7 +90,7 @@ class Cards extends FormEntity
     /**
      * @param mixed $name
      *
-     * @return Lists
+     * @return Cards
      */
     public function setName($name)
     {
@@ -110,7 +109,7 @@ class Cards extends FormEntity
 
     /**
      * @param string $description
-     * @return Pipes
+     * @return Cards
      */
     public function setDescription($description)
     {

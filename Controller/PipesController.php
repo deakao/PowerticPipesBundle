@@ -110,6 +110,7 @@ class PipesController extends AbstractStandardFormController
                             $listEntity->setName($stage->getName());
                             $listEntity->setSort($k);
                             $listEntity->setPipe($entity);
+                            $listEntity->setStage($stage);
                             $listModel->saveEntity($listEntity);
                             $list_id = $listEntity->getId();
                             $leads = $leadModel->getEntities(
@@ -376,7 +377,7 @@ class PipesController extends AbstractStandardFormController
                 if (null === $entity) {
                     $flashes[] = [
                         'type'    => 'error',
-                        'msg'     => 'plugin.powerticpipes.error.notfound',
+                        'msg'     => $this->getTranslatedString('error.notfound'),
                         'msgVars' => ['%id%' => $objectId],
                     ];
                 } elseif (!$this->get('mautic.security')->isGranted($this->getPermissionBase().':delete')) {
@@ -394,7 +395,7 @@ class PipesController extends AbstractStandardFormController
 
                 $flashes[] = [
                     'type'    => 'notice',
-                    'msg'     => 'plugin.powerticpipes.notice.batch_deleted',
+                    'msg'     => $this->getTranslatedString('notice.batch_deleted'),
                     'msgVars' => [
                         '%count%' => count($entities),
                     ],

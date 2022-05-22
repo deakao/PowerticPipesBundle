@@ -36,6 +36,17 @@ return [
         ]
     ],
     'services' => [
+        'events' => [
+            'mautic.powerticpipes.subscriber' => [
+                'class'     => 'MauticPlugin\PowerticPipesBundle\EventListener\LeadSubscriber',
+                'arguments' => [
+                    'mautic.lead.model.lead',
+                    'mautic.powerticpipes.model.cards',
+                    'mautic.stage.model.stage',
+                    'mautic.powerticpipes.model.lists',
+                ],
+            ],
+        ],
         'models' => [
             'mautic.powerticpipes.model.pipes' => [
                 'class'     => 'MauticPlugin\PowerticPipesBundle\Model\PipesModel'

@@ -5,6 +5,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
 use Mautic\CoreBundle\Entity\FormEntity;
 use Doctrine\Common\Collections\ArrayCollection;
+use Mautic\StageBundle\Entity\Stage;
 
 class Lists extends FormEntity
 {
@@ -33,7 +34,11 @@ class Lists extends FormEntity
    * @var \MauticPlugin\PowerticPipesBundle\Entity\Pipes
    */
   private $pipe;
-  
+
+  /**
+   * @var \Mautic\StageBundle\Entity\Stage
+   */
+  private $stage;
   
   public function __construct()
   {
@@ -61,6 +66,11 @@ class Lists extends FormEntity
       $builder->createField('sort', 'integer')
             ->columnName('sort')
             ->nullable()
+            ->build();
+
+      $builder->createManyToOne('stage', Stage::class)
+            ->inversedBy('stages')
+            ->addJoinColumn('stage_id', 'id', true, false, 'CASCADE')
             ->build();
 
       $builder->addIdColumns('name', false);
@@ -101,6 +111,11 @@ class Lists extends FormEntity
       return $this;
     }
 
+    public function getPipe()
+    {
+      return $this->pipe;
+    }
+
     public function setSort($sort)
     {
       $this->sort = (int) $sort;
@@ -110,6 +125,17 @@ class Lists extends FormEntity
     public function getSort()
     {
       return $this->sort;
+    }
+
+    public function setStage($stage)
+    {
+      $this->stage = $stage;
+      return $this;
+    }
+    
+    public function getStage()
+    {
+      return $this->stage;
     }
     
 }

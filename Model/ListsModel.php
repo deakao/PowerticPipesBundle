@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace MauticPlugin\PowerticPipesBundle\Model;
 
 use Doctrine\DBAL\Query\QueryBuilder;
@@ -10,7 +11,7 @@ use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 class ListsModel extends FormModel implements AjaxLookupModelInterface
 {
-  public function createForm($entity, $formFactory, $action = null, $options = [])
+    public function createForm($entity, $formFactory, $action = null, $options = [])
     {
         if (!$entity instanceof Lists) {
             throw new MethodNotAllowedHttpException(['Lists']);
@@ -53,9 +54,37 @@ class ListsModel extends FormModel implements AjaxLookupModelInterface
         return $entity;
     }
 
-  public function getLookupResults($type, $filter = '', $limit = 10, $start = 0, $options = [])
-  {
-    $results = [];
-    return $results;
-  }
+    public function getEntitiesFromStage($stageEntity)
+    {
+        $qb = $this->em->createQueryBuilder();
+        $qb->select('l')
+            ->from('PowerticPipesBundle:Lists', 'l')
+            ->where(
+                $qb->expr()->eq('l.stage', ':stage')
+            )
+            ->setParameter('stage', $stageEntity->getId());
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function getEntitiesFromPipe($pipe_id)
+    {
+        $qb = $this->em->createQueryBuilder();
+        $qb->select('l')
+            ->from('PowerticPipesBundle:Lists', 'l')
+            ->join('l.pipe', 'p')
+            ->where(
+                $qb->expr()->eq('p.id', $pipe_id)
+            );
+
+        $results = $qb->getQuery()->getResult();
+
+        return $results;
+    }
+
+    public function getLookupResults($type, $filter = '', $limit = 10, $start = 0, $options = [])
+    {
+        $results = [];
+        return $results;
+    }
 }
