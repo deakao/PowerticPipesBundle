@@ -82,9 +82,18 @@ $view['slots']->set(
                 <p class="text-center"><?php echo $view['translator']->trans('plugin.powerticpipes.loadingLeads') ?></p>
             </div>
             <script>
-                setTimeout(function () {
-                    window.location.reload();
-                }, 5000);
+                function getStatusPipe(){
+                    setTimeout(function () {
+                        mQuery.getJSON(mauticAjaxUrl+'?action=plugin:powerticPipes:pipeCompleted&pipe_id=<?php echo $entity->getId() ?>', function(data){
+                            if(data.is_completed){
+                                window.location.reload();
+                            } else {
+                                getStatusPipe()
+                            }
+                        });
+                    }, 5000);
+                }
+                getStatusPipe();
             </script>
         <?php else: ?>
             <div class="pr-md pl-md pt-lg pb-lg">

@@ -66,4 +66,13 @@ class AjaxController extends CommonAjaxController
         }
         return $this->sendJsonResponse(['cards' => $output]);
     }
+
+    protected function pipeCompletedAction(Request $request)
+    {
+        $pipeModel = $this->getModel('powerticpipes.pipes');
+        $pipe_id = $request->query->get('pipe_id');
+        $pipe = $pipeModel->getEntity($pipe_id);
+
+        return $this->sendJsonResponse(['is_completed' => $pipe->getIsCompleted()]);
+    }
 }
