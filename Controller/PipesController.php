@@ -228,7 +228,7 @@ class PipesController extends AbstractStandardFormController
             $boards[$list['id']]['item'] = [];
 
             $boards[$list['id']]['current_page'] = 1;
-            $boards[$list['id']]['per_page'] = 5;
+            $boards[$list['id']]['per_page'] = 20;
             $boards[$list['id']]['total_items'] = (int) $modelCards->getCountFromList($list['id']);
             $boards[$list['id']]['total_pages'] = ceil($boards[$list['id']]['total_items'] / $boards[$list['id']]['per_page']);
             $cards = $modelCards->getFromList($list['id'], $boards[$list['id']]['per_page']);
