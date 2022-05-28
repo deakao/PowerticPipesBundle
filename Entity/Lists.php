@@ -137,5 +137,4 @@ class Lists extends FormEntity
     {
       return $this->stage;
     }
-    
 }

@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Mautic\CoreBundle\Controller\AbstractFormController;
 use Mautic\CoreBundle\Factory\PageHelperFactoryInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Process\Process;
 
 
 /**
@@ -84,57 +85,17 @@ class PipesController extends AbstractStandardFormController
                 if ($valid = $this->isFormValid($form)) {
                     //form is valid so process the data
                     $post = $this->request->get('pipes');
+                    if($post['fromStages']){
+                        $entity->setIsCompleted(false);
+                    } else {
+                        $entity->setIsCompleted(true);
+                    }
+                    
                     $model->saveEntity($entity);
                     
                     if($post['fromStages']){
-                        $listModel = $this->getModel('powerticpipes.lists');
-                        $stageModel = $this->getModel('stage');
-                        $leadModel = $this->getModel('lead');
-                        $cardModel = $this->getModel('powerticpipes.cards');
-
-                        $stagesPublished = $stageModel->getEntities(
-                            [
-                                'filter' => [
-                                    'force' => [
-                                        [
-                                            'column' => 's.isPublished',
-                                            'expr'   => 'eq',
-                                            'value'  => true,
-                                        ],
-                                    ],
-                                ],
-                            ]
-                        );
-                        foreach($stagesPublished as $k => $stage){
-                            $listEntity = $listModel->getEntity();
-                            $listEntity->setName($stage->getName());
-                            $listEntity->setSort($k);
-                            $listEntity->setPipe($entity);
-                            $listEntity->setStage($stage);
-                            $listModel->saveEntity($listEntity);
-                            $list_id = $listEntity->getId();
-                            $leads = $leadModel->getEntities(
-                                [
-                                    'filter' => [
-                                        'force' => [
-                                            [
-                                                'column' => 'l.stage_id',
-                                                'expr'   => 'eq',
-                                                'value'  => $stage->getId(),
-                                            ],
-                                        ],
-                                    ],
-                                ]
-                            );
-                            foreach($leads as $lead){
-                                $cardEntity = $cardModel->getEntity();
-                                $cardEntity->setList($listEntity);
-                                $cardEntity->setLead($lead);
-                                $cardEntity->setName($lead->getFirstname().' '.$lead->getLastname());
-                                $cardModel->saveEntity($cardEntity);
-                            }
-                            
-                        }
+                        $cmd = 'php '.$this->get('kernel')->getProjectDir().'/bin/console pipes:import:leads --pipe='.$entity->getId().' > /dev/null&';
+                        shell_exec($cmd);
                     }
 
 

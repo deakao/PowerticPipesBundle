@@ -76,24 +76,34 @@ $view['slots']->set(
             </div>
             <!--/ bar detail collapseable toggler -->
         </div>
-        <div class="pr-md pl-md pt-lg pb-lg">
-          <a href="<?php echo $view['router']->path(
-                                    'mautic_powerticpipes.lists_action',
-                                    ['pipe_id' => $entity->getId(), 'objectAction' => 'new']
-                                ); ?>" class="btn btn-success" id="add_list"><i class="fa fa-plus"></i> <?php echo $view['translator']->trans('plugin.powerticpipes.add_list'); ?></a>
-        </div>
-        
-        <script>
-            var addCardAction = "<?php echo $addCardAction ?>";
-            var updateListSortAction = "<?php echo $updateListSortAction ?>";
-            var updateListNameAction = "<?php echo $updateListNameAction ?>";
-            var updateCardSortAction = "<?php echo $updateCardSortAction ?>";
-            var editCardAction = "<?php echo $editCardAction ?>";
-            var removeListAction = "<?php echo $removeListAction ?>";
-            var removeCardAction = "<?php echo $removeCardAction ?>";
-            var kanban_content = <?php echo json_encode($boards) ?>;
-        </script>
-        <div id="myKanban"></div>
+        <?php if(!$entity->getIsCompleted()) : ?>
+            <div class="pr-md pl-md pt-lg pb-lg">
+                <p class="text-center"><span class="fa fa-spinner fa-spin fa-3x"></span></p>
+                <p class="text-center"><?php echo $view['translator']->trans('plugin.powerticpipes.loadingLeads') ?></p>
+            </div>
+            <script>
+                setTimeout(function () {
+                    window.location.reload();
+                }, 5000);
+            </script>
+        <?php else: ?>
+            <div class="pr-md pl-md pt-lg pb-lg">
+                <a href="<?php echo $view['router']->path('mautic_powerticpipes.lists_action', ['pipe_id' => $entity->getId(), 'objectAction' => 'new']); ?>" class="btn btn-success" id="add_list"><i class="fa fa-plus"></i> <?php echo $view['translator']->trans('plugin.powerticpipes.add_list'); ?></a>
+            </div>
+            
+            <script>
+                var addCardAction = "<?php echo $addCardAction ?>";
+                var updateListSortAction = "<?php echo $updateListSortAction ?>";
+                var updateListNameAction = "<?php echo $updateListNameAction ?>";
+                var updateCardSortAction = "<?php echo $updateCardSortAction ?>";
+                var editCardAction = "<?php echo $editCardAction ?>";
+                var removeListAction = "<?php echo $removeListAction ?>";
+                var removeCardAction = "<?php echo $removeCardAction ?>";
+                var kanban_content = <?php echo json_encode($boards) ?>;
+            </script>
+            
+            <div id="myKanban"></div>
+        <?php endif; ?>
     </div>
     <!--/ left section -->
 </div>

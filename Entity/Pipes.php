@@ -35,6 +35,8 @@ class Pipes extends FormEntity
     
     private $fromStages;
 
+    private $is_completed;
+
     public function __construct()
     {
         $this->lists = new ArrayCollection();
@@ -53,6 +55,10 @@ class Pipes extends FormEntity
         $builder->createOneToMany('lists', 'Lists')
             ->mappedBy('pipe')
             ->addJoinColumn('id', 'pipe_id', true, false, 'CASCADE')
+            ->build();
+        
+        $builder->createField('is_completed', 'boolean')
+            ->columnName('is_completed')
             ->build();
 
         $builder->addIdColumns();
@@ -118,5 +124,16 @@ class Pipes extends FormEntity
     {
         $this->fromStages = $stage;
         return $this;
+    }
+
+    public function setIsCompleted($is_completed)
+    {
+      $this->is_completed = $is_completed;
+      return $this;
+    }
+
+    public function getIsCompleted()
+    {
+      return $this->is_completed;
     }
 }
