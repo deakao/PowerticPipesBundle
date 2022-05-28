@@ -90,7 +90,7 @@ class PipesController extends AbstractStandardFormController
                     } else {
                         $entity->setIsCompleted(true);
                     }
-                    
+
                     $model->saveEntity($entity);
                     
                     if($post['fromStages']){
@@ -181,6 +181,7 @@ class PipesController extends AbstractStandardFormController
         $model    = $this->getModel($this->getModelName());
         $entity   = $model->getEntity($objectId);
         $security = $this->get('mautic.security');
+        $modelCards = $this->getModel('powerticpipes.cards');
 
         if (null === $entity) {
             $page = $this->get('session')->get('mautic.'.$this->getSessionBase().'.page', 1);
@@ -225,7 +226,14 @@ class PipesController extends AbstractStandardFormController
             $boards[$list['id']]['id'] = 'id_'.$list['id'];
             $boards[$list['id']]['title'] = $list['name'];
             $boards[$list['id']]['item'] = [];
-            foreach($list['cards'] as $item) {
+
+            $boards[$list['id']]['current_page'] = 1;
+            $boards[$list['id']]['per_page'] = 5;
+            $boards[$list['id']]['total_items'] = (int) $modelCards->getCountFromList($list['id']);
+            $boards[$list['id']]['total_pages'] = ceil($boards[$list['id']]['total_items'] / $boards[$list['id']]['per_page']);
+            $cards = $modelCards->getFromList($list['id'], $boards[$list['id']]['per_page']);
+            
+            foreach($cards as $item) {
                 $lead = [];
                 if($item['lead']){
                     $lead = [

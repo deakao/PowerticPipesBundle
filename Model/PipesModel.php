@@ -58,22 +58,20 @@ class PipesModel extends FormModel implements AjaxLookupModelInterface
     public function getFull($id)
     {
         $qb = $this->em->createQueryBuilder()
-                    ->select('p, l, c, lc')
+                    ->select('p, l')
                     ->from('PowerticPipesBundle:Pipes', 'p')
                     ->leftJoin('p.lists', 'l')
-                    ->leftJoin('l.cards', 'c')
-                    ->leftJoin('c.lead', 'lc')
-                    ->orderBy('l.sort, c.sort')
+                    ->orderBy('l.sort')
                     ->where('p.id = '.$id);
      
             
         return $qb->getQuery()->getArrayResult();
     }
 
-  public function getLookupResults($type, $filter = '', $limit = 10, $start = 0, $options = [])
-  {
-    $results = [];
-    return $results;
-  }
+    public function getLookupResults($type, $filter = '', $limit = 10, $start = 0, $options = [])
+    {
+        $results = [];
+        return $results;
+    }
 
 }

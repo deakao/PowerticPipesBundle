@@ -5,6 +5,46 @@ Mautic.composePipeWatcher = function(container) {
 Mautic.composePipeCreate = function(container) {
 
   createKanban();
+  mQuery('body').on('click', '.kanban-board-nav-next', function(e) {
+    e.preventDefault();
+    var elm = mQuery(this);
+    var boardKey = elm.attr('data-boardKey');
+    var list = kanban_content[boardKey];
+    var list_id = list['id'].replace('id_', '');
+    var offset = list['current_page'] * list['per_page'];
+    var icon_orgin = elm.html();
+    elm.html('<i class="fa fa-spinner fa-spin"></i>');
+    mQuery.getJSON(mauticAjaxUrl+'?action=plugin:powerticPipes:cardsList&list_id='+list_id+'&offset='+offset+'&per_page='+list['per_page'], function(data){
+      elm.html(icon_orgin);
+      kanban_content[boardKey]['current_page']++;
+      kanban_content[boardKey]['item'] = data.cards;
+      kanban=null;
+      mQuery('#myKanban').html('');
+      createKanban();
+    });
+  });
+  mQuery('body').on('click', '.kanban-board-nav-prev', function(e) {
+    e.preventDefault();
+    var elm = mQuery(this);
+    var boardKey = elm.attr('data-boardKey');
+    var list = kanban_content[boardKey];
+    var list_id = list['id'].replace('id_', '');
+    kanban_content[boardKey]['current_page']--;
+    var offset = (kanban_content[boardKey]['current_page'] -1) * list['per_page'];
+    if(kanban_content[boardKey]['current_page'] == 1){
+      offset = 0;
+    }
+    var icon_orgin = elm.html();
+    elm.html('<i class="fa fa-spinner fa-spin"></i>');
+    mQuery.getJSON(mauticAjaxUrl+'?action=plugin:powerticPipes:cardsList&list_id='+list_id+'&offset='+offset+'&per_page='+list['per_page'], function(data){
+      elm.html(icon_orgin);
+      kanban_content[boardKey]['item'] = data.cards;
+      kanban=null;
+      mQuery('#myKanban').html('');
+      createKanban();
+    });
+  });
+
       mQuery('body').on('click', '.kanban-item-title', function(e){
         e.preventDefault();
         var elm = mQuery(this).parents('.kanban-item');

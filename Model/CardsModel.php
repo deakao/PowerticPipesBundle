@@ -53,9 +53,32 @@ class CardsModel extends FormModel implements AjaxLookupModelInterface
         return $entity;
     }
 
-  public function getLookupResults($type, $filter = '', $limit = 10, $start = 0, $options = [])
-  {
-    $results = [];
-    return $results;
-  }
+    public function getFromList($list_id, $limit = 10, $offset = 0)
+    {
+        $qb = $this->em->createQueryBuilder()
+            ->select('c, lc')
+            ->from('PowerticPipesBundle:Cards', 'c')
+            ->leftJoin('c.lead', 'lc')
+            ->where('c.list = '.$list_id)
+            ->setFirstResult($offset)
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getArrayResult();
+    }
+
+    public function getCountFromList($list_id)
+    {
+        $qb = $this->em->createQueryBuilder()
+            ->select('count(c.id)')
+            ->from('PowerticPipesBundle:Cards', 'c')
+            ->where('c.list = '.$list_id);
+
+        return $qb->getQuery()->getSingleScalarResult();
+    }
+
+    public function getLookupResults($type, $filter = '', $limit = 10, $start = 0, $options = [])
+    {
+        $results = [];
+        return $results;
+    }
 }

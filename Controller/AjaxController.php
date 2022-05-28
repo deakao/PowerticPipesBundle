@@ -35,4 +35,35 @@ class AjaxController extends CommonAjaxController
         
         return $this->sendJsonResponse(['leads' => $dataArray]);
     }
+
+    protected function cardsListAction(Request $request)
+    {
+        $modelCards = $this->getModel('powerticpipes.cards');
+        $modelLists = $this->getModel('powerticpipes.lists');
+        $list_id = $request->query->get('list_id');
+        $offset = $request->query->get('offset');
+        $limit = $request->query->get('per_page');
+
+        $output = [];
+        $cards = $modelCards->getFromList($list_id, $limit, $offset);
+        foreach($cards as $item) {
+            $lead = [];
+            if($item['lead']){
+                $lead = [
+                    'id' => $item['lead']['id'],
+                    'name' => $item['lead']['firstname'].' '.$item['lead']['lastname'],
+                    'email' => $item['lead']['email'],
+                ];
+            }
+
+            $output[] = [
+                'creator' => $item['createdByUser'],
+                'date' => ($item['dateModified'] ? $item['dateModified']->format('d/m/Y H:i:s') : $item['dateAdded']->format('d/m/Y H:i:s')), 
+                'title' => $item['name'], 
+                'lead' => $lead,
+                'id' => $item['id']
+            ];
+        }
+        return $this->sendJsonResponse(['cards' => $output]);
+    }
 }
