@@ -28,7 +28,6 @@ class PipesCommand extends ContainerAwareCommand
 
   protected function execute(InputInterface $input, OutputInterface $output)
   {
-    sleep(10);
     $pipe_id = $input->getOption('pipe');
     $container = $this->getContainer();
     $em = $container->get('doctrine.orm.entity_manager');
