@@ -67,7 +67,7 @@ class ListsModel extends FormModel implements AjaxLookupModelInterface
         return $qb->getQuery()->getResult();
     }
 
-    public function getEntitiesFromPipe($pipe_id)
+    public function getEntitiesFromPipe($pipe_id, $has_stage=false)
     {
         $qb = $this->em->createQueryBuilder();
         $qb->select('l')
@@ -76,6 +76,11 @@ class ListsModel extends FormModel implements AjaxLookupModelInterface
             ->where(
                 $qb->expr()->eq('p.id', $pipe_id)
             );
+        if($has_stage){
+            $qb->andWhere(
+                $qb->expr()->isNotNull('l.stage')
+            );
+        }
 
         $results = $qb->getQuery()->getResult();
 

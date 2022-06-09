@@ -81,4 +81,14 @@ class CardsModel extends FormModel implements AjaxLookupModelInterface
         $results = [];
         return $results;
     }
+
+    public function getEntityFromLead($lead_id, $list_id)
+    {
+        $qb = $this->em->createQueryBuilder()
+            ->select('c')
+            ->from('PowerticPipesBundle:Cards', 'c')
+            ->where('c.list = '.$list_id)
+            ->andWhere('c.lead = '.$lead_id);
+        return $qb->getQuery()->getArrayResult();
+    }
 }

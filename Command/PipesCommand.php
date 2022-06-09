@@ -18,8 +18,15 @@ class PipesCommand extends ContainerAwareCommand
          ->addOption(
            '--pipe',
            '-p',
-           InputOption::VALUE_REQUIRED,
+           InputOption::VALUE_OPTIONAL,
            'Pipe Id',
+           null
+         )
+         ->addOption(
+           '--create',
+           '-c',
+           InputOption::VALUE_OPTIONAL,
+           'Create lists',
            null
          );
       
@@ -29,63 +36,115 @@ class PipesCommand extends ContainerAwareCommand
   protected function execute(InputInterface $input, OutputInterface $output)
   {
     $pipe_id = $input->getOption('pipe');
+    $create = $input->getOption('create');
+    if($create and !$pipe_id){
+        $output->writeln('<error>Pipe Id is required</error>');
+        return false;
+    }
     $container = $this->getContainer();
     $em = $container->get('doctrine.orm.entity_manager');
     $modelFactory = $container->get('mautic.model.factory');
     
+    
     $pipeModel = $modelFactory->getModel('powerticpipes.pipes');
-    $entity = $pipeModel->getEntity($pipe_id);
-
-    $listModel = $modelFactory->getModel('powerticpipes.lists');
-    $stageModel = $modelFactory->getModel('stage');
-    $leadModel = $modelFactory->getModel('lead');
-    $cardModel = $modelFactory->getModel('powerticpipes.cards');
-
-    $stagesPublished = $stageModel->getEntities(
-        [
+    $where = [];
+    if($pipe_id){
+        $where = [
             'filter' => [
                 'force' => [
                     [
-                        'column' => 's.isPublished',
+                        'column' => 'powertic_pipes.id',
                         'expr'   => 'eq',
-                        'value'  => true,
+                        'value'  => $pipe_id,
                     ],
                 ],
             ],
-        ]
-    );
-    foreach($stagesPublished as $k => $stage){
-        $listEntity = $listModel->getEntity();
-        $listEntity->setName($stage->getName());
-        $listEntity->setSort($k);
-        $listEntity->setPipe($entity);
-        $listEntity->setStage($stage);
-        $listModel->saveEntity($listEntity);
-        $list_id = $listEntity->getId();
-        $leads = $leadModel->getEntities(
-            [
-                'filter' => [
-                    'force' => [
-                        [
-                            'column' => 'l.stage_id',
-                            'expr'   => 'eq',
-                            'value'  => $stage->getId(),
+        ];
+    }
+    $pipeEntities = $pipeModel->getEntities($where);
+    
+    foreach($pipeEntities as $entity) {
+        $listModel = $modelFactory->getModel('powerticpipes.lists');
+        $stageModel = $modelFactory->getModel('stage');
+        $leadModel = $modelFactory->getModel('lead');
+        $cardModel = $modelFactory->getModel('powerticpipes.cards');
+        if($create){
+
+            $stagesPublished = $stageModel->getEntities(
+                [
+                    'filter' => [
+                        'force' => [
+                            [
+                                'column' => 's.isPublished',
+                                'expr'   => 'eq',
+                                'value'  => true,
+                            ],
                         ],
                     ],
-                ],
-            ]
-        );
-        foreach($leads as $lead){
-            $cardEntity = $cardModel->getEntity();
-            $cardEntity->setList($listEntity);
-            $cardEntity->setLead($lead);
-            $cardEntity->setName($lead->getFirstname().' '.$lead->getLastname());
-            $cardModel->saveEntity($cardEntity);
+                ]
+            );
+            foreach($stagesPublished as $k => $stage){
+                $listEntity = $listModel->getEntity();
+                $listEntity->setName($stage->getName());
+                $listEntity->setSort($k);
+                $listEntity->setPipe($entity);
+                $listEntity->setStage($stage);
+                $listModel->saveEntity($listEntity);
+                $list_id = $listEntity->getId();
+                $leads = $leadModel->getEntities(
+                    [
+                        'filter' => [
+                            'force' => [
+                                [
+                                    'column' => 'l.stage_id',
+                                    'expr'   => 'eq',
+                                    'value'  => $stage->getId(),
+                                ],
+                            ],
+                        ],
+                    ]
+                );
+                foreach($leads as $lead){
+                    $cardEntity = $cardModel->getEntity();
+                    $cardEntity->setList($listEntity);
+                    $cardEntity->setLead($lead);
+                    $cardEntity->setName($lead->getFirstname().' '.$lead->getLastname());
+                    $cardModel->saveEntity($cardEntity);
+                }
+                
+            }
+            $entity->setIsCompleted(true);
+            $pipeModel->saveEntity($entity);
+        } else {
+            $listEntities = $listModel->getEntitiesFromPipe($entity->getId(), true);
+
+            foreach($listEntities as $listEntity){
+                $leads = $leadModel->getEntities(
+                    [
+                        'filter' => [
+                            'force' => [
+                                [
+                                    'column' => 'l.stage_id',
+                                    'expr'   => 'eq',
+                                    'value'  => $listEntity->getStage()->getId(),
+                                ],
+                            ],
+                        ],
+                    ]
+                );
+                foreach($leads as $lead){
+                    $checkCardLead = $cardModel->getEntityFromLead($lead->getId(), $listEntity->getId());
+                    if(!$checkCardLead){
+                        $cardEntity = $cardModel->getEntity();
+                        $cardEntity->setList($listEntity);
+                        $cardEntity->setLead($lead);
+                        $cardEntity->setName($lead->getFirstname().' '.$lead->getLastname());
+                        $cardModel->saveEntity($cardEntity);
+                    }
+                }
+            }
         }
-        
     }
-    $entity->setIsCompleted(true);
-    $pipeModel->saveEntity($entity);
 
     //$output->writeLn('id: '.$pipe_id);
     return 0;

@@ -94,7 +94,7 @@ class PipesController extends AbstractStandardFormController
                     $model->saveEntity($entity);
                     
                     if($post['fromStages']){
-                        $cmd = 'php '.$this->get('kernel')->getProjectDir().'/bin/console pipes:import:leads --pipe='.$entity->getId().' > /dev/null&';
+                        $cmd = 'php '.$this->get('kernel')->getProjectDir().'/bin/console pipes:import:leads --pipe='.$entity->getId().' --create=true > /dev/null&';
                         shell_exec($cmd);
                     }
 

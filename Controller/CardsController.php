@@ -115,6 +115,7 @@ class CardsController extends AbstractStandardFormController
     public function updateSortAction()
     {
         $model = $this->getModel($this->getModelName());
+        $leadModel = $this->getModel('lead');
         $listModel = $this->getModel('powerticpipes.lists');
         $listEntity = $listModel->getEntity($this->request->get('list_id'));
         $cards = $this->request->get('card_id');
@@ -128,6 +129,13 @@ class CardsController extends AbstractStandardFormController
                 $entity->setDateModified($dateModified->getUtcDateTime());
             }
             $model->saveEntity($entity);
+            $stage = $entity->getList()->getStage();
+            $lead = $entity->getLead();
+            if($stage and $lead){
+                $entityLead = $leadModel->getEntity($lead->getId());
+                $entityLead->setStage($stage);
+                $leadModel->saveEntity($entityLead);
+            }
         }
         return new JsonResponse(['status' => 1]);
     }
