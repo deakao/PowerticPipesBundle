@@ -33,6 +33,13 @@ class CardsType extends AbstractType
             'required'   => false,
         ]);
 
+        $builder->add('value', TextType::class, [
+            'label'      => 'plugin.powerticpipes.card.value',
+            'label_attr' => ['class' => 'control-label'],
+            'attr'       => ['class' => 'form-control'],
+            'required'   => false,
+        ]);
+
         $choices = [];
         $preferred_choices = null;
         if($options['data'] and $options['data']->getLead()){

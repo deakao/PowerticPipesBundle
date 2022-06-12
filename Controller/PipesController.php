@@ -221,6 +221,7 @@ class PipesController extends AbstractStandardFormController
 
         $route = $this->generateUrl($this->getActionRoute(), $routeVars);
         $board = $model->getFull($entity->getId())[0];
+        
         $boards = [];
         foreach ($board['lists'] as $list) {
             $boards[$list['id']]['id'] = 'id_'.$list['id'];
@@ -240,12 +241,15 @@ class PipesController extends AbstractStandardFormController
                         'id' => $item['lead']['id'],
                         'name' => $item['lead']['firstname'].' '.$item['lead']['lastname'],
                         'email' => $item['lead']['email'],
+                        'company' => $item['lead']['company'],
                     ];
                 }
 
                 $boards[$list['id']]['item'][] = [
                     'creator' => $item['createdByUser'],
                     'date' => ($item['dateModified'] ? $item['dateModified']->format('d/m/Y H:i:s') : $item['dateAdded']->format('d/m/Y H:i:s')), 
+                    'date_added' => $item['dateAdded']->format('d/m/Y H:i:s'), 
+                    'value' => $item['value'],
                     'title' => $item['name'], 
                     'lead' => $lead,
                     'id' => $item['id']
@@ -258,6 +262,7 @@ class PipesController extends AbstractStandardFormController
             'viewParameters' => [
                 'entity'     => $entity,
                 'boards'     => array_values($boards),
+                'cardColumns' => ($board['leadColumns'] ? $board['leadColumns'] : []),
                 'addCardAction' => $this->generateUrl('mautic_powerticpipes.cards_action', ['objectAction' => 'new']),
                 'updateListSortAction' => $this->generateUrl('mautic_powerticpipes.lists_action', ['objectAction' => 'updateSort']),
                 'removeListAction' => $this->generateUrl('mautic_powerticpipes.lists_action', ['objectAction' => 'delete']),

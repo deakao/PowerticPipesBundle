@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Mautic\CoreBundle\Form\Type\FormButtonsType;
 use Mautic\CoreBundle\Form\Type\YesNoButtonGroupType;
+use Mautic\CoreBundle\Form\Type\MultiselectType;
 use Symfony\Component\Form\FormBuilderInterface;
 
 class PipesType extends AbstractType
@@ -42,7 +43,7 @@ class PipesType extends AbstractType
                 'class' => 'form-control',
             ], ]);
 
-        if (!empty($options['data']) && $options['data'] instanceof Stage) {
+        if (!empty($options['data'])) {
             $readonly = !$this->security->hasEntityAccess(
                 'powerticpipes:pipes:publishown',
                 'powerticpipes:pipes:publishother',
@@ -66,7 +67,21 @@ class PipesType extends AbstractType
 
         $builder->add('fromStages', YesNoButtonGroupType::class, [
             'label' => 'plugin.powerticpipes.pipes.fromstages',
-            'data'  => false,
+            'data'  => ($options['data']->getFromStages() ? true : false),
+        ]);
+
+        $choices = [
+            'plugin.powerticpipes.card.value' => 'powertic_pipes_cards.value',
+            'plugin.powerticpipes.card.date_added' => 'powertic_pipes_cards.date_added',
+            'mautic.core.name' => 'lead.name',
+            'mautic.core.email' => 'lead.email',
+            'mautic.core.company' => 'lead.company',
+        ];
+
+        $builder->add('leadColumns', MultiselectType::class, [
+            'label' => 'plugin.powerticpipes.pipes.leadColumns',
+            'data'  => $options['data']->getLeadColumns(),
+            'choices' => $choices
         ]);
         $builder->add('buttons', FormButtonsType::class);
     }

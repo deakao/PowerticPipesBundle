@@ -101,6 +101,7 @@ $view['slots']->set(
             </div>
             
             <script>
+                var cardColumns = <?php echo json_encode($cardColumns) ?>;
                 var addCardAction = "<?php echo $addCardAction ?>";
                 var updateListSortAction = "<?php echo $updateListSortAction ?>";
                 var updateListNameAction = "<?php echo $updateListNameAction ?>";

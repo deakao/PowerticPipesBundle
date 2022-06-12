@@ -39,6 +39,7 @@ class Cards extends FormEntity
    */
   private $lead;
   
+  private $value;
   
   public function __construct()
   {
@@ -59,6 +60,11 @@ class Cards extends FormEntity
     
     $builder->createField('sort', 'integer')
             ->columnName('sort')
+            ->nullable()
+            ->build();
+    
+    $builder->createField('value', 'float')
+            ->columnName('value')
             ->nullable()
             ->build();
 
@@ -147,6 +153,17 @@ class Cards extends FormEntity
     public function setLead($lead)
     {
       $this->lead = $lead;
+      return $this;
+    }
+
+    public function getValue()
+    {
+      return $this->value;
+    }
+
+    public function setValue($value)
+    {
+      $this->value = $value;
       return $this;
     }
 }

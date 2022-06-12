@@ -40,6 +40,7 @@ class CardsController extends AbstractStandardFormController
             $post = $this->request->get('cards');
             $entity->setName($post['name']);
             $entity->setDescription($post['description']);
+            $entity->setValue($post['value']);
             if($post['lead']){
                 $lead = $this->getModel('lead')->getEntity($post['lead']);
                 $entity->setLead($lead);
@@ -102,6 +103,7 @@ class CardsController extends AbstractStandardFormController
         $entity->setList($list);
         $entity->setSort($this->request->get('order'));
         $entity->setName($this->request->get('name'));
+        $entity->setValue($this->request->get('value'));
 
         $model->saveEntity($entity);
 

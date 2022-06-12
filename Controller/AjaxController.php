@@ -53,12 +53,14 @@ class AjaxController extends CommonAjaxController
                     'id' => $item['lead']['id'],
                     'name' => $item['lead']['firstname'].' '.$item['lead']['lastname'],
                     'email' => $item['lead']['email'],
+                    'company' => $item['lead']['company'],
                 ];
             }
 
             $output[] = [
                 'creator' => $item['createdByUser'],
                 'date' => ($item['dateModified'] ? $item['dateModified']->format('d/m/Y H:i:s') : $item['dateAdded']->format('d/m/Y H:i:s')), 
+                'date_added' => $item['dateAdded']->format('d/m/Y H:i:s'), 
                 'title' => $item['name'], 
                 'lead' => $lead,
                 'id' => $item['id']

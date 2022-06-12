@@ -10,7 +10,6 @@
  */
 $view->extend('MauticCoreBundle:Default:content.html.php');
 $view['slots']->set('mauticContent', 'pipes');
-
 $header = ($entity->getId()) ?
     $view['translator']->trans('plugin.powerticpipes.edit',
         ['%name%' => $view['translator']->trans($entity->getName())]) :
@@ -45,7 +44,8 @@ echo $view['form']->start($form);
             <div class="pr-lg pl-lg pt-md pb-md">
                 <?php
                 echo $view['form']->row($form['isPublished']);
-                echo (isset($newAction) ? $view['form']->row($form['fromStages']) : '');
+                echo $view['form']->row($form['fromStages']);
+                echo $view['form']->row($form['leadColumns']);
                 ?>
             </div>
         </div>
