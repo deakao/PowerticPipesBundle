@@ -96,9 +96,11 @@ $view['slots']->set(
                 getStatusPipe();
             </script>
         <?php else: ?>
-            <div class="pr-md pl-md pt-lg pb-lg">
-                <a href="<?php echo $view['router']->path('mautic_powerticpipes.lists_action', ['pipe_id' => $entity->getId(), 'objectAction' => 'new']); ?>" class="btn btn-success" id="add_list"><i class="fa fa-plus"></i> <?php echo $view['translator']->trans('plugin.powerticpipes.add_list'); ?></a>
-            </div>
+            <?php if(!$entity->getFromStages()) : ?>
+                <div class="pr-md pl-md pt-lg pb-lg">
+                    <a href="<?php echo $view['router']->path('mautic_powerticpipes.lists_action', ['pipe_id' => $entity->getId(), 'objectAction' => 'new']); ?>" class="btn btn-success" id="add_list"><i class="fa fa-plus"></i> <?php echo $view['translator']->trans('plugin.powerticpipes.add_list'); ?></a>
+                </div>
+            <?php endif; ?>
             
             <script>
                 var cardColumns = <?php echo json_encode($cardColumns) ?>;
