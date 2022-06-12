@@ -117,13 +117,15 @@ class CardsController extends AbstractStandardFormController
         $model = $this->getModel($this->getModelName());
         $leadModel = $this->getModel('lead');
         $listModel = $this->getModel('powerticpipes.lists');
+        
         $listEntity = $listModel->getEntity($this->request->get('list_id'));
         $cards = $this->request->get('card_id');
         $orders = $this->request->get('order');
         foreach($cards as $k => $card) {
             $entity = $model->getEntity($card);
             $entity->setSort($orders[$k]);
-            if($entity->getList()->getId() != $this->request->get('list_id')) {
+            $current_list = $entity->getList()->getId();
+            if($current_list != $this->request->get('list_id')) {
                 $entity->setList($listEntity);
                 $dateModified = new DateTimeHelper();
                 $entity->setDateModified($dateModified->getUtcDateTime());
@@ -131,9 +133,9 @@ class CardsController extends AbstractStandardFormController
             $model->saveEntity($entity);
             $stage = $entity->getList()->getStage();
             $lead = $entity->getLead();
-            if($stage and $lead){
+            if($stage and $lead and ($current_list != $this->request->get('list_id'))){
                 $entityLead = $leadModel->getEntity($lead->getId());
-                $entityLead->setStage($stage);
+                $leadModel->addToStages($entityLead, $stage);
                 $leadModel->saveEntity($entityLead);
             }
         }
