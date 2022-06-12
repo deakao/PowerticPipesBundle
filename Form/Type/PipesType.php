@@ -76,6 +76,12 @@ class PipesType extends AbstractType
             'mautic.core.name' => 'lead.name',
             'mautic.core.email' => 'lead.email',
             'mautic.core.company' => 'lead.company',
+            'mautic.lead.lead.pointscount' => 'lead.points',
+            'mautic.core.position' => 'lead.position',
+            'mautic.core.type.tel' => 'lead.phone',
+            'mautic.lead.field.type.tel.mobile' => 'lead.mobile',
+            'mautic.lead.field.address' => 'lead.address',
+            'mautic.lead.lead.thead.country' => 'lead.country',
         ];
 
         $builder->add('leadColumns', MultiselectType::class, [
