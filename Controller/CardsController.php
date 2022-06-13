@@ -111,6 +111,9 @@ class CardsController extends AbstractStandardFormController
             'id' => $entity->getId(),
             'date' => date('d/m/Y H:i:s'),
             'creator' => $user->getName(),
+            'date_added' => date('d/m/Y H:i:s'), 
+            'value' => '',
+            'title' => $this->request->get('name'), 
         ]);
     }
 
