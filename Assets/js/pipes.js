@@ -221,8 +221,7 @@ function createKanban(){
             post_data['order['+index+']'] = index+1;
           });
           mQuery.post(updateCardSortAction, post_data);
-          var utc = new Date().toJSON();
-          mQuery(item).find('.kanban-item-date').text(utc.slice(0,10).split('-').reverse().join('/')+' '+utc.slice(11,19));
+          
 
         },
         buttonRemoveClick: function(el, boardId) {

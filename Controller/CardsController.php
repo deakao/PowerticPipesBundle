@@ -40,7 +40,7 @@ class CardsController extends AbstractStandardFormController
             $post = $this->request->get('cards');
             $entity->setName($post['name']);
             $entity->setDescription($post['description']);
-            $entity->setValue($post['value']);
+            $entity->setValue(($post['value'] ? $post['value'] : null));
             if($post['lead']){
                 $lead = $this->getModel('lead')->getEntity($post['lead']);
                 $entity->setLead($lead);
