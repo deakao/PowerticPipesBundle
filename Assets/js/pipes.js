@@ -85,7 +85,7 @@ Mautic.composePipeCreate = function(container) {
             elm.find('.fa').removeClass('fa-spinner fa-spin').addClass('fa-plus');
             kanban.addBoards([
               {
-                id: data.list_id,
+                id: 'id_'+data.list_id,
                 title: data.name,
               }]
             );
