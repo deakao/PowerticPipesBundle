@@ -39,6 +39,8 @@ class Pipes extends FormEntity
 
     private $leadColumns;
 
+    private $import_status;
+
     public function __construct()
     {
         $this->lists = new ArrayCollection();
@@ -71,6 +73,10 @@ class Pipes extends FormEntity
             ->columnName('is_completed')
             ->build();
 
+        $builder->createField('import_status', 'json')
+            ->columnName('import_status')
+            ->build();
+
         $builder->addIdColumns();
     }
 
@@ -88,6 +94,17 @@ class Pipes extends FormEntity
     public function getName()
     {
         return $this->name;
+    }
+
+    public function getImportStatus()
+    {
+        return $this->import_status;
+    }
+
+    public function setImportStatus($import_status)
+    {
+        $this->import_status = $import_status;
+        return $this;
     }
 
     /**

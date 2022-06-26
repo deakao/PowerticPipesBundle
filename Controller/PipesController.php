@@ -77,6 +77,7 @@ class PipesController extends AbstractStandardFormController
         
         
         $viewParameters = ['page' => $page];
+        
 
         if ('POST' === $method) {
             $valid = false;
@@ -87,6 +88,13 @@ class PipesController extends AbstractStandardFormController
                     $post = $this->request->get('pipes');
                     if($post['fromStages']){
                         $entity->setIsCompleted(false);
+                        $leadsRepository = $this->getDoctrine()->getRepository('MauticLeadBundle:Lead');
+                        $leadsTotal = $leadsRepository->createQueryBuilder('l')
+                            ->select('count(l.id)')
+                            ->where('l.stage IS NOT NULL')
+                            ->getQuery()
+                            ->getSingleScalarResult();
+                        $entity->setImportStatus(['total' => $leadsTotal, 'processed' => 0]);
                     } else {
                         $entity->setIsCompleted(true);
                     }

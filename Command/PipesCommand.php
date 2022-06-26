@@ -62,12 +62,14 @@ class PipesCommand extends ContainerAwareCommand
         ];
     }
     $pipeEntities = $pipeModel->getEntities($where);
+    $listModel = $modelFactory->getModel('powerticpipes.lists');
+    $stageModel = $modelFactory->getModel('stage');        
+    $cardModel = $modelFactory->getModel('powerticpipes.cards');
+    $leadModel = $modelFactory->getModel('lead');
+    $leadsRepository = $leadModel->getRepository();
     
     foreach($pipeEntities as $entity) {
-        $listModel = $modelFactory->getModel('powerticpipes.lists');
-        $stageModel = $modelFactory->getModel('stage');
-        $leadModel = $modelFactory->getModel('lead');
-        $cardModel = $modelFactory->getModel('powerticpipes.cards');
+        
         if($create){
 
             $stagesPublished = $stageModel->getEntities(
@@ -83,6 +85,7 @@ class PipesCommand extends ContainerAwareCommand
                     ],
                 ]
             );
+
             foreach($stagesPublished as $k => $stage){
                 $listEntity = $listModel->getEntity();
                 $listEntity->setName($stage->getName());
@@ -91,25 +94,42 @@ class PipesCommand extends ContainerAwareCommand
                 $listEntity->setStage($stage);
                 $listModel->saveEntity($listEntity);
                 $list_id = $listEntity->getId();
-                $leads = $leadModel->getEntities(
-                    [
-                        'filter' => [
-                            'force' => [
-                                [
-                                    'column' => 'l.stage_id',
-                                    'expr'   => 'eq',
-                                    'value'  => $stage->getId(),
+
+                $leadsTotal = $leadsRepository->createQueryBuilder('l')
+                            ->select('count(l.id)')
+                            ->where('l.stage = :stage')
+                            ->setParameter('stage', $stage->getId())
+                            ->getQuery()
+                            ->getSingleScalarResult();
+                $pages = ceil($leadsTotal / 100);
+                for ($i=0; $i < $pages; $i++) { 
+                
+                    $leads = $leadModel->getEntities(
+                        [
+                            'filter' => [
+                                'force' => [
+                                    [
+                                        'column' => 'l.stage_id',
+                                        'expr'   => 'eq',
+                                        'value'  => $stage->getId(),
+                                    ],
                                 ],
                             ],
-                        ],
-                    ]
-                );
-                foreach($leads as $lead){
-                    $cardEntity = $cardModel->getEntity();
-                    $cardEntity->setList($listEntity);
-                    $cardEntity->setLead($lead);
-                    $cardEntity->setName($lead->getFirstname().' '.$lead->getLastname());
-                    $cardModel->saveEntity($cardEntity);
+                            'limit' => 100,
+                            'start' => ($i * 100),
+                        ]
+                    );
+                    foreach($leads as $lead){
+                        $cardEntity = $cardModel->getEntity();
+                        $cardEntity->setList($listEntity);
+                        $cardEntity->setLead($lead);
+                        $cardEntity->setName($lead->getFirstname().' '.$lead->getLastname());
+                        $cardModel->saveEntity($cardEntity);
+                    }
+                    $import_status = $entity->getImportStatus();
+                    $import_status['processed'] += count($leads);
+                    $entity->setImportStatus($import_status);
+                    $pipeModel->saveEntity($entity);
                 }
                 
             }
@@ -119,27 +139,38 @@ class PipesCommand extends ContainerAwareCommand
             $listEntities = $listModel->getEntitiesFromPipe($entity->getId(), true);
 
             foreach($listEntities as $listEntity){
-                $leads = $leadModel->getEntities(
-                    [
-                        'filter' => [
-                            'force' => [
-                                [
-                                    'column' => 'l.stage_id',
-                                    'expr'   => 'eq',
-                                    'value'  => $listEntity->getStage()->getId(),
+                $leadsTotal = $leadsRepository->createQueryBuilder('l')
+                            ->select('count(l.id)')
+                            ->where('l.stage = :stage')
+                            ->setParameter('stage', $listEntity->getStage()->getId())
+                            ->getQuery()
+                            ->getSingleScalarResult();
+                $pages = ceil($leadsTotal / 100);
+                for ($i=0; $i < $pages; $i++) { 
+                    $leads = $leadModel->getEntities(
+                        [
+                            'filter' => [
+                                'force' => [
+                                    [
+                                        'column' => 'l.stage_id',
+                                        'expr'   => 'eq',
+                                        'value'  => $listEntity->getStage()->getId(),
+                                    ],
                                 ],
                             ],
-                        ],
-                    ]
-                );
-                foreach($leads as $lead){
-                    $checkCardLead = $cardModel->getEntityFromLead($lead->getId(), $listEntity->getId());
-                    if(!$checkCardLead){
-                        $cardEntity = $cardModel->getEntity();
-                        $cardEntity->setList($listEntity);
-                        $cardEntity->setLead($lead);
-                        $cardEntity->setName($lead->getFirstname().' '.$lead->getLastname());
-                        $cardModel->saveEntity($cardEntity);
+                            'limit' => 100,
+                            'start' => ($i * 100),
+                        ]
+                    );
+                    foreach($leads as $lead){
+                        $checkCardLead = $cardModel->getEntityFromLead($lead->getId(), $listEntity->getId());
+                        if(!$checkCardLead){
+                            $cardEntity = $cardModel->getEntity();
+                            $cardEntity->setList($listEntity);
+                            $cardEntity->setLead($lead);
+                            $cardEntity->setName($lead->getFirstname().' '.$lead->getLastname());
+                            $cardModel->saveEntity($cardEntity);
+                        }
                     }
                 }
             }

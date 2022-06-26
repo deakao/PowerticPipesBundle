@@ -30,6 +30,10 @@ class PowerticPipesBundle extends PluginBundleBase
         $queries[] = 'ALTER TABLE ' . MAUTIC_TABLE_PREFIX . 'powertic_pipes ADD `leadColumns` JSON NULL DEFAULT NULL AFTER `fromStages`';
         $queries[] = 'ALTER TABLE ' . MAUTIC_TABLE_PREFIX . 'powertic_pipes_cards ADD `value` FLOAT NULL DEFAULT NULL AFTER `lead_id`';
         break;
+      case "0.6":
+        $queries[] = 'ALTER TABLE ' . MAUTIC_TABLE_PREFIX . 'powertic_pipes ADD `import_status` JSON NULL DEFAULT NULL AFTER `leadColumns`';
+      break;
+
     }
     if (!empty($queries)) {
       $database->beginTransaction();

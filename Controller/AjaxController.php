@@ -81,7 +81,8 @@ class AjaxController extends CommonAjaxController
         $pipeModel = $this->getModel('powerticpipes.pipes');
         $pipe_id = $request->query->get('pipe_id');
         $pipe = $pipeModel->getEntity($pipe_id);
+        $status_import = $pipe->getImportStatus();
 
-        return $this->sendJsonResponse(['is_completed' => $pipe->getIsCompleted()]);
+        return $this->sendJsonResponse(['is_completed' => $pipe->getIsCompleted(), 'status_import' => $status_import]);
     }
 }

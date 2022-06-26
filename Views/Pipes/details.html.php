@@ -76,10 +76,11 @@ $view['slots']->set(
             </div>
             <!--/ bar detail collapseable toggler -->
         </div>
-        <?php if(!$entity->getIsCompleted()) : ?>
+        <?php if(!$entity->getIsCompleted()) : $import_status = $entity->getImportStatus() ?>
             <div class="pr-md pl-md pt-lg pb-lg">
                 <p class="text-center"><span class="fa fa-spinner fa-spin fa-3x"></span></p>
                 <p class="text-center"><?php echo $view['translator']->trans('plugin.powerticpipes.loadingLeads') ?></p>
+                <p class="text-center"><span class="processedLeads"><?php echo number_format($import_status['processed'], 0, '', '.') ?></span>/<span class="totalLeads"><?php echo number_format($import_status['total'], 0, '', '.') ?></span></p>
             </div>
             <script>
                 function getStatusPipe(){
@@ -88,6 +89,8 @@ $view['slots']->set(
                             if(data.is_completed){
                                 window.location.reload();
                             } else {
+                                mQuery('.totalLeads').html(number_format(data.status_import.total, 0, '', '.'));
+                                mQuery('.processedLeads').html(number_format(data.status_import.processed, 0, '', '.'));
                                 getStatusPipe()
                             }
                         });
