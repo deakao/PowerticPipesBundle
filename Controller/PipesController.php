@@ -96,6 +96,7 @@ class PipesController extends AbstractStandardFormController
                             ->getSingleScalarResult();
                         $entity->setImportStatus(['total' => $leadsTotal, 'processed' => 0]);
                     } else {
+                        $entity->setImportStatus(['total' => 0, 'processed' => 0]);
                         $entity->setIsCompleted(true);
                     }
 
