@@ -13,4 +13,4 @@ jobs:
     steps:
       - shell: bash
         run: | 
-          rsync -azP --exclude '.git' ~/actions-runner/_work/PowerticPipesBundle/PowerticPipesBundle/ /var/www/mautic/plugins/PowerticPipesBundle
+          rsync -azP --exclude '.git' /home/github/actions-runner/_work/PowerticPipesBundle/PowerticPipesBundle/ /var/www/mautic/plugins/PowerticPipesBundle
