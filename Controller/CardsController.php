@@ -55,6 +55,13 @@ class CardsController extends AbstractStandardFormController
                     'id' => $lead->getId(),
                     'name' => $lead->getFirstname() . ' ' . $lead->getLastname(),
                     'email' => $lead->getEmail(),
+                    'company' => $lead->getCompany(),
+                    'points' => $lead->getPoints(),
+                    'position' => $lead->getPosition(),
+                    'phone' => $lead->getPhone(),
+                    'mobile' => $lead->getMobile(),
+                    'address' => $lead->getAddress1().' '.$lead->getAddress2() .' '.$lead->getCity().' '.$lead->getState().' '.$lead->getZipcode(),
+                    'country' => $lead->getCountry(),
                 ];
             }
             
@@ -63,10 +70,15 @@ class CardsController extends AbstractStandardFormController
                 [
                     'closeModal' => true,
                     'notifyChange' => true,
-                    'name' => $entity->getName(),
+                    'creator' => $entity->getCreatedByUser(),
+                    'date' => $entity->getDateModified(),
+                    'title' => $entity->getName(),
+                    'value' => $entity->getValue(),
                     'id' => $entity->getId(),
                     'date' => date('d/m/Y H:i:s'),
-                    'lead' => $lead_content
+                    'lead' => $lead_content,
+                    'date_added' => $entity->getDateAdded()->format('d/m/Y H:i:s'),
+                    'list_total_value' => $model->getSumValueFromList($entity->getList()->getId()),
                 ]
             );
         }

@@ -44,6 +44,7 @@
   margin: 0;
   padding: 0;
   display: inline;
+  padding-left: 8px;
 }
 
 .kanban-board header .kanban-title-button {
@@ -204,4 +205,23 @@
   padding: 0 20px;
   display: table;
   width: 100%;
+}
+
+.kanban-item-lead {
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -moz-line-clamp: 1;
+  -moz-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kanban-totals {
+  padding: 8px;
+  display: table;
+  width: 100%;
+  font-size: 12px;
+}
+a.kanban-item-lead.small.kanban-item-lead-contact {
+  text-decoration: underline;
 }

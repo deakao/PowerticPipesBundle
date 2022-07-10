@@ -76,6 +76,15 @@ class CardsModel extends FormModel implements AjaxLookupModelInterface
         return $qb->getQuery()->getSingleScalarResult();
     }
 
+    public function getSumValueFromList($list_id)
+    {
+        $qb = $this->em->createQueryBuilder()
+            ->select('sum(c.value)')
+            ->from('PowerticPipesBundle:Cards', 'c')
+            ->where('c.list = '.$list_id);
+        return $qb->getQuery()->getSingleScalarResult();
+    }
+
     public function getLookupResults($type, $filter = '', $limit = 10, $start = 0, $options = [])
     {
         $results = [];

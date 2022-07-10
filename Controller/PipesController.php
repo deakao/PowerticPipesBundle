@@ -241,6 +241,7 @@ class PipesController extends AbstractStandardFormController
             $boards[$list['id']]['per_page'] = 20;
             $boards[$list['id']]['total_items'] = (int) $modelCards->getCountFromList($list['id']);
             $boards[$list['id']]['total_pages'] = ceil($boards[$list['id']]['total_items'] / $boards[$list['id']]['per_page']);
+            $boards[$list['id']]['total_value'] = $modelCards->getSumValueFromList($list['id']);
             $cards = $modelCards->getFromList($list['id'], $boards[$list['id']]['per_page']);
             
             foreach($cards as $item) {
@@ -248,20 +249,20 @@ class PipesController extends AbstractStandardFormController
                 if($item['lead']){
                     $lead = [
                         'id' => $item['lead']['id'],
-                        'name' => substr($item['lead']['firstname'].' '.$item['lead']['lastname'], 0, 100),
-                        'email' => substr($item['lead']['email'], 0, 100),
-                        'company' => substr($item['lead']['company'], 0, 100),
-                        'points' => substr($item['lead']['points'], 0, 100),
-                        'position' => substr($item['lead']['position'], 0, 100),
-                        'phone' => substr($item['lead']['phone'], 0, 100),
-                        'mobile' => substr($item['lead']['mobile'], 0, 100),
-                        'address' => substr($item['lead']['address1'].' '.$item['lead']['address2'] .' '.$item['lead']['city'].' '.$item['lead']['state'].' '.$item['lead']['zipcode'], 0, 100),
-                        'country' => substr($item['lead']['country'], 0, 100),
+                        'name' => $item['lead']['firstname'].' '.$item['lead']['lastname'],
+                        'email' => $item['lead']['email'],
+                        'company' => $item['lead']['company'],
+                        'points' => $item['lead']['points'],
+                        'position' => $item['lead']['position'],
+                        'phone' => $item['lead']['phone'],
+                        'mobile' => $item['lead']['mobile'],
+                        'address' => $item['lead']['address1'].' '.$item['lead']['address2'] .' '.$item['lead']['city'].' '.$item['lead']['state'].' '.$item['lead']['zipcode'],
+                        'country' => $item['lead']['country'],
                     ];
                 }
 
                 $boards[$list['id']]['item'][] = [
-                    'creator' => substr($item['createdByUser'], 0, 100),
+                    'creator' => $item['createdByUser'],
                     'date' => ($item['dateModified'] ? $item['dateModified']->format('d/m/Y H:i:s') : $item['dateAdded']->format('d/m/Y H:i:s')), 
                     'date_added' => $item['dateAdded']->format('d/m/Y H:i:s'), 
                     'value' => $item['value'],

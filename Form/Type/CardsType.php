@@ -41,11 +41,11 @@ class CardsType extends AbstractType
         ]);
 
         $choices = [];
-        $preferred_choices = null;
+        $choice_value = null;
         if($options['data'] and $options['data']->getLead()){
             $lead = $options['data']->getLead();
             $choices[$lead->getFirstName(). ' '.$lead->getLastName(). '('.$lead->getEmail().')'] = $lead->getId();
-            $preferred_choices = $options['data']->getLead()->getId();
+            $choice_value = $lead->getId();
         }
 
         $builder->add('lead', ChoiceType::class, [
@@ -58,8 +58,7 @@ class CardsType extends AbstractType
             ], 
             'required'   => false,
             'choices' => $choices,
-            'choice_value' => $preferred_choices
-            
+            'data' => $choice_value
         ]);
             
         
