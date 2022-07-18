@@ -116,6 +116,12 @@ Mautic.composePipeCreate = function(container) {
         {
           id: 'id_'+data.list_id,
           title: data.name,
+          current_page: data.current_page,
+          per_page: data.per_page,
+          total_items: data.total_items,
+          total_pages: data.total_pages,
+          total_value: data.total_value,
+          item: []
         }]
       );
     }, 'json');
@@ -158,7 +164,10 @@ Mautic.composePipeCreate = function(container) {
 
   mQuery('body').on('input', '.kanban-title-board', function(e) {
     var text = mQuery(this).text();
-    var id = mQuery(this).parents('.kanban-board').attr('data-id').replace('id_', '');
+    let board = mQuery(this).parents('.kanban-board');
+    var id = board.attr('data-id').replace('id_', '');
+    let k = board.attr('data-boardkey');
+    kanban_content[k]['title'] = text;
     var post_data = {
       'name': text,
       'list_id': id
@@ -168,12 +177,23 @@ Mautic.composePipeCreate = function(container) {
 
   mQuery('body').on('click', '.kanban-item-remove', function(e) {
     e.preventDefault();
-    var elm = mQuery(this)
-    var id = elm.parents('.kanban-item').attr('data-eid');
+    var elm = mQuery(this);
+    var card = elm.parents('.kanban-item');
+    var id = card.attr('data-eid');
+    var board = elm.parents('.kanban-board');
+    var boardKey = board.attr('data-boardkey');
+    var list = kanban_content[boardKey];
+    if(card.attr('data-value')){
+      list.total_value -= parseFloat(card.attr('data-value'));
+    }
+    list.total_items--;
+    board.find('.total_value span').text(number_format(list.total_value, 2, ',', '.'));
+    board.find('.total_items span').text(list.total_items);
+
     if(confirm(mauticLang['plugin.powerticpipes.confirm_delete_card'])){
       mQuery.get(removeCardAction+'/'+id.replace('id_', ''));
-      elm.parents('.kanban-item').fadeOut(function(){
-        elm.parents('.kanban-item').remove();
+      card.fadeOut(function(){
+        card.remove();
       });
     }
   });
@@ -223,6 +243,7 @@ function createKanban() {
         e.preventDefault();
         var itens = kanban.getBoardElements(boardId);
         
+        
         var text = e.target[0].value;
         formItem.parentNode.removeChild(formItem);
 
@@ -231,12 +252,22 @@ function createKanban() {
           name: text,
           order: itens.length+1
         }, function(data){
-          kanban.addElement(boardId, {
+          mQuery(kanban.findBoard(boardId)).find('.total_items span').text(itens.length+1);
+          let card = {
             title: text,
             id: data.id,
             date: data.date,
             creator: data.creator,
+            lead: [],
+            value: 0
+          };
+          kanban_content.map(function(item){
+            if(item.id == boardId){
+              item.item.push(card);
+              item.total_items++;
+            }
           });
+          kanban.addElement(boardId, card);
         });
       });
 
@@ -268,8 +299,13 @@ function createKanban() {
 
     },
     buttonRemoveClick: function(el, boardId) {
+      
       if(confirm(mauticLang['plugin.powerticpipes.confirm_delete_list'])){
-        mQuery(el).parents('.kanban-board').fadeOut(function(){
+        let board = mQuery(el).parents('.kanban-board');
+        let boardKey = board.attr('data-boardkey');
+        kanban_content.splice(boardKey, 1);
+
+        board.fadeOut(function(){
           mQuery(this).remove();
         });
         mQuery.get(removeListAction+'/'+boardId.replace('id_', ''));

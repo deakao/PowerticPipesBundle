@@ -48,7 +48,16 @@ class ListsController extends AbstractStandardFormController
 
         $model->saveEntity($entity);
 
-        return new JsonResponse(['list_id' => $entity->getId(), 'name' => $entity->getName()]);
+        return new JsonResponse([
+            'list_id' => $entity->getId(), 
+            'name' => $entity->getName(),
+            'current_page' => 1,
+            'per_page' => 20,
+            'total_items' => 0,
+            'total_pages' => 1,
+            'item' => [],
+            'total_value' => 0
+        ]);
     }
 
     public function updateSortAction()
