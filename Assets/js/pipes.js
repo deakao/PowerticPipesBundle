@@ -112,18 +112,18 @@ Mautic.composePipeCreate = function(container) {
     
     mQuery.post(elm.attr('href'), post_data, function(data){
       elm.find('.fa').removeClass('fa-spinner fa-spin').addClass('fa-plus');
-      kanban.addBoards([
-        {
-          id: 'id_'+data.list_id,
-          title: data.name,
-          current_page: data.current_page,
-          per_page: data.per_page,
-          total_items: data.total_items,
-          total_pages: data.total_pages,
-          total_value: data.total_value,
-          item: []
-        }]
-      );
+      kanban_content.push({
+        id: 'id_'+data.list_id,
+        title: data.name,
+        current_page: data.current_page,
+        per_page: data.per_page,
+        total_items: data.total_items,
+        total_pages: data.total_pages,
+        total_value: data.total_value,
+        item: []
+      });
+      mQuery('#myKanban').html('');
+      createKanban();
     }, 'json');
   });
 
