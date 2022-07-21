@@ -6,6 +6,7 @@ use Mautic\CoreBundle\Controller\AjaxController as CommonAjaxController;
 use Mautic\CoreBundle\Controller\AjaxLookupControllerTrait;
 use Mautic\CoreBundle\Helper\InputHelper;
 use Symfony\Component\HttpFoundation\Request;
+use MauticPlugin\PowerticPipesBundle\Helper\CardHelper;
 
 class AjaxController extends CommonAjaxController
 {
@@ -46,6 +47,10 @@ class AjaxController extends CommonAjaxController
 
         $output = [];
         $cards = $modelCards->getFromList($list_id, $limit, $offset);
+        
+        $helper = new CardHelper($this->get('translator'));
+        $now = date('Y-m-d H:i:s');
+
         foreach($cards as $item) {
             $lead = [];
             if($item['lead']){
@@ -62,10 +67,12 @@ class AjaxController extends CommonAjaxController
                     'country' => substr($item['lead']['country'], 0, 100),
                 ];
             }
+            $card_date = ($item['dateModified'] ? $item['dateModified'] : $item['dateAdded']);
 
             $output[] = [
                 'creator' => $item['createdByUser'],
-                'date' => ($item['dateModified'] ? $item['dateModified']->format('d/m/Y H:i:s') : $item['dateAdded']->format('d/m/Y H:i:s')), 
+                'date' => $card_date->format('d/m/Y H:i:s'), 
+                'stucked' => $helper->getStuckSince($card_date->format('Y-m-d H:i:s'), $now),
                 'date_added' => $item['dateAdded']->format('d/m/Y H:i:s'), 
                 'title' => $item['name'], 
                 'value' => $item['value'],

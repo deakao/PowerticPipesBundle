@@ -216,7 +216,7 @@ function reloadList() {
     createKanban();
   });
 }
-
+var dragingCard;
 function createKanban() {
 
   kanban = new jKanban({
@@ -257,6 +257,7 @@ function createKanban() {
             title: text,
             id: data.id,
             date: data.date,
+            stucked: mauticLang['plugin.powerticpipes.card.now'],
             creator: data.creator,
             lead: [],
             value: 0
@@ -284,13 +285,44 @@ function createKanban() {
       });
       mQuery.post(updateListSortAction, post_data);
     },
-    dragendEl: function (item) {
-      console.log(item);
-      var elm = mQuery(item).parents('.kanban-board');
-      var post_data = {
-        'list_id': elm.attr('data-id').replace('id_', ''),
+    dragEl: function(el, source) {
+      
+      var board = mQuery(source).parents('.kanban-board');
+      var elm = mQuery(el);
+      var boardKey = board.attr('data-boardkey');
+      var list = kanban_content[boardKey];
+      if(elm.attr('data-value')){
+        list.total_value -= parseFloat(elm.attr('data-value'));
       }
-      elm.find('.kanban-item').each(function(index, el) {
+      list.total_items--;
+      board.find('.total_value span').text(number_format(list.total_value, 2, ',', '.'));
+      board.find('.total_items span').text(list.total_items);
+      list.item.map(function(item){
+        if(item.id == parseInt(elm.attr('data-eid'))){
+          item.stucked = mauticLang['plugin.powerticpipes.card.now'];
+          dragingCard = item;
+          list.item.splice(list.item.indexOf(item), 1);
+        }
+      });
+    },
+    dragendEl: function (item) {
+      var board = mQuery(item).parents('.kanban-board');
+      var boardKey = board.attr('data-boardkey');
+      var elm = mQuery(item);
+      
+      var list = kanban_content[boardKey];
+      if(elm.attr('data-value')){
+        list.total_value += parseFloat(elm.attr('data-value'));
+      }
+      list.total_items++;
+      board.find('.total_value span').text(number_format(list.total_value, 2, ',', '.'));
+      board.find('.total_items span').text(list.total_items);
+      list.item.push(dragingCard);
+
+      var post_data = {
+        'list_id': board.attr('data-id').replace('id_', ''),
+      }
+      board.find('.kanban-item').each(function(index, el) {
         post_data['card_id['+index+']'] = mQuery(el).attr('data-eid');
         post_data['order['+index+']'] = index+1;
       });

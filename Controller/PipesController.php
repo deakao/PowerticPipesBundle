@@ -9,7 +9,7 @@ use Mautic\CoreBundle\Controller\AbstractFormController;
 use Mautic\CoreBundle\Factory\PageHelperFactoryInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Process\Process;
-
+use MauticPlugin\PowerticPipesBundle\Helper\CardHelper;
 
 /**
  * Class PipesController.
@@ -221,6 +221,8 @@ class PipesController extends AbstractStandardFormController
 
         $this->setListFilters();
 
+        $helper = new CardHelper($this->get('translator'));
+        $now = date('Y-m-d H:i:s');
 
         // Generate route
         $routeVars = [
@@ -260,10 +262,12 @@ class PipesController extends AbstractStandardFormController
                         'country' => $item['lead']['country'],
                     ];
                 }
+                $card_date = ($item['dateModified'] ? $item['dateModified'] : $item['dateAdded']);
 
                 $boards[$list['id']]['item'][] = [
                     'creator' => $item['createdByUser'],
-                    'date' => ($item['dateModified'] ? $item['dateModified']->format('d/m/Y H:i:s') : $item['dateAdded']->format('d/m/Y H:i:s')), 
+                    'date' => $card_date->format('d/m/Y H:i:s'), 
+                    'stucked' => $helper->getStuckSince($card_date->format('Y-m-d H:i:s'), $now),
                     'date_added' => $item['dateAdded']->format('d/m/Y H:i:s'), 
                     'value' => $item['value'],
                     'title' => $item['name'], 

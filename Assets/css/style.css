@@ -200,6 +200,7 @@
 .kanban-item-title{
   cursor: pointer;
   text-decoration: underline;
+  overflow: hidden;
 }
 .kanban-board-nav{
   padding: 0 20px;
